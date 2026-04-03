@@ -763,62 +763,6 @@ footer{
     </div>
   </div>
 
-  <!-- WORKFLOW FILE -->
-  <div class="section-head fade-up d4" style="margin-top:64px">
-    <h2>Recommended Workflow File</h2>
-    <div class="sh-line"></div>
-  </div>
-
-  <div class="file-block fade-up d4">
-    <div class="file-block-header">
-      <span class="file-block-title">.github/workflows/static.yml</span>
-      <span class="file-block-badge">GitHub Actions · Pages Deploy</span>
-    </div>
-    <div class="code-body">
-<span class="cm"># Drone Sim Project — GitHub Pages Deployment</span>
-<span class="cm"># Author: Joyal Varghese</span>
-
-<span class="cy">name:</span> <span class="cw">Deploy Drone Sim to GitHub Pages</span>
-
-<span class="cy">on:</span>
-  <span class="cg">push:</span>
-    <span class="cv">branches:</span>
-      - <span class="cs">main</span>
-  <span class="cg">workflow_dispatch:</span>
-
-<span class="cy">permissions:</span>
-  <span class="cv">contents:</span> <span class="cs">read</span>
-  <span class="cv">pages:</span> <span class="cs">write</span>
-  <span class="cv">id-token:</span> <span class="cs">write</span>
-
-<span class="cy">concurrency:</span>
-  <span class="cv">group:</span> <span class="cs">pages</span>
-  <span class="cv">cancel-in-progress:</span> <span class="cs">false</span>
-
-<span class="cy">jobs:</span>
-  <span class="cg">deploy:</span>
-    <span class="cv">environment:</span>
-      <span class="cv">name:</span> <span class="cs">github-pages</span>
-      <span class="cv">url:</span> <span class="cs">${{ steps.deployment.outputs.page_url }}</span>
-    <span class="cv">runs-on:</span> <span class="cs">ubuntu-latest</span>
-    <span class="cv">steps:</span>
-      - <span class="cv">name:</span> <span class="cs">Checkout</span>
-        <span class="cg">uses:</span> <span class="cs">actions/checkout@v4</span>
-
-      - <span class="cv">name:</span> <span class="cs">Setup Pages</span>
-        <span class="cg">uses:</span> <span class="cs">actions/configure-pages@v4</span>
-
-      - <span class="cv">name:</span> <span class="cs">Upload Artifact</span>
-        <span class="cg">uses:</span> <span class="cs">actions/upload-pages-artifact@v3</span>
-        <span class="cv">with:</span>
-          <span class="cv">path:</span> <span class="cs">'.'</span>
-
-      - <span class="cv">name:</span> <span class="cs">Deploy to GitHub Pages</span>
-        <span class="cg">id:</span> <span class="cs">deployment</span>
-        <span class="cg">uses:</span> <span class="cs">actions/deploy-pages@v4</span>
-    </div>
-  </div>
-
   <!-- FEATURES -->
   <div class="section-head fade-up d4" style="margin-top:64px">
     <h2>Drone System Features</h2>
