@@ -4,20 +4,18 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Drone System — Joyal Varghese</title>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600&family=Inter:wght@300;400;500;600&family=Cormorant+Garamond:wght@300;400;500&display=swap" rel="stylesheet"/>
+
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&family=Inter:wght@300;400;500;600&family=Orbitron:wght@400;600&display=swap" rel="stylesheet"/>
 
 <style>
-/* ================= RESET ================= */
-*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+*{margin:0;padding:0;box-sizing:border-box}
 
 :root{
-  --bg:#04060c;
-  --surface:#0a0f1f;
-  --card:#0e1428;
-  --border:#1e2a4a;
+  --bg:#05070d;
+  --card:#0c1224;
   --accent:#4ac8ff;
   --accent2:#00ffc3;
-  --text:#cfe6ff;
+  --text:#d6e8ff;
   --muted:#7f95c0;
 }
 
@@ -28,16 +26,15 @@ body{
   overflow-x:hidden;
 }
 
-/* ================= CINEMATIC BACKGROUND ================= */
+/* ===== CINEMATIC BACKGROUND ===== */
 body::before{
   content:'';
   position:fixed;
   inset:-20%;
   background:
     radial-gradient(circle at 20% 30%, rgba(74,200,255,0.15), transparent 40%),
-    radial-gradient(circle at 80% 70%, rgba(0,255,200,0.12), transparent 40%),
-    radial-gradient(circle at 50% 90%, rgba(74,200,255,0.08), transparent 50%);
-  animation:bgMove 30s linear infinite;
+    radial-gradient(circle at 80% 70%, rgba(0,255,200,0.1), transparent 40%);
+  animation:bgMove 25s linear infinite;
   z-index:-2;
 }
 
@@ -47,61 +44,139 @@ body::before{
   100%{transform:translate(0,0)}
 }
 
-/* ================= STARFIELD ================= */
+/* ===== STARFIELD ===== */
 body::after{
   content:'';
   position:fixed;
   inset:0;
   background-image:
     radial-gradient(1px 1px at 10% 20%, rgba(255,255,255,0.4), transparent),
-    radial-gradient(1px 1px at 70% 10%, rgba(255,255,255,0.3), transparent),
-    radial-gradient(1px 1px at 40% 80%, rgba(255,255,255,0.2), transparent);
+    radial-gradient(1px 1px at 60% 80%, rgba(255,255,255,0.3), transparent),
+    radial-gradient(1px 1px at 90% 40%, rgba(255,255,255,0.25), transparent);
   z-index:-1;
 }
 
-/* ================= HEADER ================= */
+/* ===== HEADER ===== */
 header{
-  text-align:center;
-  padding:80px 20px 40px;
+  padding:80px 60px 40px;
+  position:relative;
 }
 
+/* PREMIUM NAME */
+.brand{
+  font-family:'Cormorant Garamond';
+  font-size:28px;
+  letter-spacing:2px;
+  color:var(--accent);
+  animation:fadeUp 1s ease forwards;
+}
+
+/* BIG TITLE */
 h1{
   font-family:'Orbitron';
-  font-size:clamp(40px,6vw,70px);
+  font-size:clamp(50px,6vw,80px);
+  margin-top:20px;
   background:linear-gradient(90deg,var(--accent),var(--accent2));
   -webkit-background-clip:text;
   color:transparent;
+  animation:fadeUp 1s ease forwards;
 }
 
-.subtitle{
-  margin-top:10px;
+h1 span{
+  display:block;
+  font-family:'Cormorant Garamond';
+  font-style:italic;
+  font-size:0.6em;
+}
+
+/* DESCRIPTION */
+.desc{
+  max-width:600px;
+  margin-top:20px;
   color:var(--muted);
+  line-height:1.8;
+  animation:fadeUp 1s ease forwards;
+}
+
+/* BUTTON ROW */
+.btn-row{
+  margin-top:30px;
+  display:flex;
+  gap:20px;
+}
+
+/* GITHUB BUTTON */
+.btn{
+  padding:14px 28px;
+  border:1px solid var(--accent);
+  color:var(--accent);
+  text-decoration:none;
   letter-spacing:2px;
   font-size:12px;
+  transition:0.3s;
 }
 
-/* ================= DRONE ================= */
+.btn:hover{
+  background:var(--accent);
+  color:black;
+}
+
+/* 🔥 WOKWI BUTTON (PREMIUM) */
+.wokwi-btn{
+  position:relative;
+  padding:14px 28px;
+  border:1px solid #00ffc3;
+  color:#00ffc3;
+  text-decoration:none;
+  letter-spacing:2px;
+  font-size:12px;
+  overflow:hidden;
+}
+
+/* glowing animation */
+.wokwi-btn::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  background:linear-gradient(120deg,transparent,rgba(0,255,195,0.4),transparent);
+  transform:translateX(-100%);
+  animation:scan 3s infinite;
+}
+
+@keyframes scan{
+  to{transform:translateX(100%)}
+}
+
+.wokwi-btn:hover{
+  background:rgba(0,255,195,0.1);
+  box-shadow:0 0 20px rgba(0,255,195,0.4);
+}
+
+/* ===== DRONE ===== */
 .drone{
+  position:absolute;
+  right:100px;
+  top:120px;
   width:260px;
   height:260px;
-  margin:60px auto;
-  position:relative;
   animation:float 4s ease-in-out infinite;
 }
 
 @keyframes float{
   0%,100%{transform:translateY(0)}
-  50%{transform:translateY(-18px)}
+  50%{transform:translateY(-20px)}
 }
 
 .arm{
   position:absolute;
-  width:130px;
+  width:120px;
   height:2px;
   background:var(--accent);
-  top:50%;left:50%;
+  top:50%;
+  left:50%;
   transform-origin:left center;
 }
+
 .arm:nth-child(1){transform:rotate(0)}
 .arm:nth-child(2){transform:rotate(90deg)}
 .arm:nth-child(3){transform:rotate(180deg)}
@@ -109,7 +184,8 @@ h1{
 
 .rotor{
   position:absolute;
-  width:42px;height:42px;
+  width:40px;
+  height:40px;
   border:2px solid var(--accent2);
   border-radius:50%;
   animation:spin 0.25s linear infinite;
@@ -118,150 +194,74 @@ h1{
 .rotor::after{
   content:'';
   position:absolute;
-  width:24px;height:4px;
+  width:24px;
+  height:4px;
   background:var(--accent2);
-  top:50%;left:50%;
+  top:50%;
+  left:50%;
   transform:translate(-50%,-50%);
 }
 
-@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+@keyframes spin{
+  from{transform:rotate(0)}
+  to{transform:rotate(360deg)}
+}
 
 .r1{top:0;left:50%;transform:translate(-50%,0)}
 .r2{bottom:0;left:50%;transform:translate(-50%,0)}
 .r3{left:0;top:50%;transform:translate(0,-50%)}
 .r4{right:0;top:50%;transform:translate(0,-50%)}
 
-/* ================= SECTIONS ================= */
-.section{
-  max-width:1200px;
-  margin:60px auto;
-  padding:40px;
-  background:rgba(15,20,40,0.6);
-  border:1px solid var(--border);
-  border-radius:18px;
-  backdrop-filter:blur(12px);
+/* ===== FADE ===== */
+@keyframes fadeUp{
+  from{opacity:0;transform:translateY(30px)}
+  to{opacity:1;transform:translateY(0)}
 }
 
-.section h2{
-  font-family:'Cormorant Garamond';
-  font-size:32px;
-  color:var(--accent);
-  margin-bottom:20px;
-}
-
-.section p{
-  color:var(--muted);
-  line-height:1.8;
-}
-
-/* ================= GRID ================= */
-.grid{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:20px;
-  margin-top:30px;
-}
-
-.card{
-  padding:25px;
-  background:var(--card);
-  border:1px solid var(--border);
-  transition:0.3s;
-}
-
-.card:hover{
-  transform:translateY(-10px);
-  border-color:var(--accent);
-}
-
-/* ================= TERMINAL ================= */
-.terminal{
-  background:#020408;
-  border:1px solid var(--border);
-  padding:20px;
-  font-family:monospace;
-  font-size:12px;
-  margin-top:20px;
-  color:#4ac890;
-}
-
-/* ================= FOOTER ================= */
-footer{
-  text-align:center;
-  padding:40px;
-  color:var(--muted);
-  font-size:12px;
-}
-
+/* RESPONSIVE */
 @media(max-width:900px){
-  .grid{grid-template-columns:1fr}
+  header{padding:40px}
+  .drone{position:relative;right:auto;top:auto;margin:40px auto}
 }
-
 </style>
 </head>
 
 <body>
 
 <header>
-<h1>JOYAL VARGHESE</h1>
-<div class="subtitle">AUTONOMOUS DRONE ENGINEERING SYSTEM</div>
-</header>
 
+<div class="brand">Joyal Varghese</div>
+
+<h1>
+  Quadcopter System
+  <span>Drone Simulation</span>
+</h1>
+
+<p class="desc">
+  Advanced Arduino-based quadcopter system featuring PID stabilization,
+  real-time sensor fusion, and high-frequency motor control simulation.
+</p>
+
+<div class="btn-row">
+  <a href="#" class="btn">GitHub</a>
+
+  <!-- 🔥 YOUR WOKWI LINK WITH ANIMATION -->
+  <a href="https://wokwi.com/projects/460318666113414145" target="_blank" class="wokwi-btn">
+    Launch Simulation
+  </a>
+</div>
+
+<!-- DRONE -->
 <div class="drone">
-<div class="arm"></div>
-<div class="arm"></div>
-<div class="arm"></div>
-<div class="arm"></div>
-<div class="rotor r1"></div>
-<div class="rotor r2"></div>
-<div class="rotor r3"></div>
-<div class="rotor r4"></div>
+  <div class="arm"></div>
+  <div class="arm"></div>
+  <div class="arm"></div>
+  <div class="arm"></div>
+
+  <div class="rotor r1"></div>
+  <div class="rotor r2"></div>
+  <div class="rotor r3"></div>
+  <div class="rotor r4"></div>
 </div>
 
-<div class="section">
-<h2>Drone Simulation</h2>
-<p>
-High fidelity quadcopter simulation with PID stabilization, real-time sensor fusion, and ESC motor control.
-</p>
-<div class="terminal">
-=== Drone Sim ===
-ARMED
-Roll: 0.0
-Pitch: 0.0
-Altitude: 3.9m
-Motors: 1420 1418 1422 1416
-</div>
-</div>
-
-<div class="section">
-<h2>System Features</h2>
-<div class="grid">
-<div class="card">PID Stabilization</div>
-<div class="card">MPU6050 Fusion</div>
-<div class="card">ESC Mixing</div>
-<div class="card">Altitude Control</div>
-<div class="card">LCD Telemetry</div>
-<div class="card">ARM Safety Logic</div>
-</div>
-</div>
-
-<div class="section">
-<h2>Engineering Details</h2>
-<p>
-Control loop runs at 50Hz. Real-time balancing across axes ensures stable hover and responsive motion.
-</p>
-</div>
-
-<div class="section">
-<h2>About the Project</h2>
-<p>
-Designed and developed by Joyal Varghese, this system demonstrates embedded systems engineering, real-time computation, and simulation design.
-</p>
-</div>
-
-<footer>
-© 2026 Joyal Varghese — Drone Portfolio
-</footer>
-
-</body>
-</html>
+</header>
