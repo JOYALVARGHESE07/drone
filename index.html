@@ -1,175 +1,222 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Drone Project — Joyal Varghese</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Montserrat:wght@200;300;400;500;600&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet"/>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Joyal Varghese — Drone Simulation</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
-/* ... (Keep all the CSS from the previous message) ... */
-*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-:root{--bg:#07090f;--surface:#0b0e18;--card:#0f1220;--border:#1e2235;--border-blue:#2a4a8a;--blue:#4a8fd4;--blue-bright:#6fb0f0;--blue-dim:#1a2d4a;--cream:#c0d0e8;--white:#e8f0f8;--muted:#3a4560;--text:#7a90b8;--text-light:#a0b8d8;--green:#007a4d;--red:#8a3030;}
-html{scroll-behavior:smooth}
-body{background:var(--bg);color:var(--text);font-family:'Montserrat',sans-serif;font-weight:300;overflow-x:hidden;min-height:100vh;}
-body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");pointer-events:none;z-index:9999;opacity:0.6;}
-@keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
-@keyframes rotor{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
-@keyframes pulse{0%,100%{opacity:0.6}50%{opacity:1}}
-.fade-up{animation:fadeUp 0.8s ease forwards;opacity:0;}
-.d1{animation-delay:0.1s}.d2{animation-delay:0.25s}.d3{animation-delay:0.4s}.d4{animation-delay:0.55s}.d5{animation-delay:0.7s}
-.top-bar{background:linear-gradient(90deg,#050810,#0a1228,#050810);border-bottom:1px solid var(--border-blue);padding:10px 72px;display:flex;justify-content:space-between;align-items:center;position:relative;z-index:10;}
-.top-bar span{font-size:9px;letter-spacing:4px;text-transform:uppercase;color:rgba(100,160,255,0.55);font-weight:400;}
-.top-bar .status-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--blue);margin-right:8px;animation:pulse 2s ease-in-out infinite;}
-header{padding:64px 72px 0;border-bottom:1px solid var(--border-blue);background:linear-gradient(160deg,#07090f 0%,#0d1225 60%,#07090f 100%);position:relative;overflow:hidden;z-index:1;}
-.drone-bg{position:absolute;right:340px;top:40px;opacity:0.04;pointer-events:none;}
-.header-inner{display:grid;grid-template-columns:1fr 280px;gap:48px;align-items:start;}
-h1{font-family:'Cormorant Garamond',serif;font-size:clamp(40px,6vw,72px);font-weight:300;color:var(--white);line-height:1.05;letter-spacing:-0.5px;}
-h1 em{font-style:italic;color:var(--blue-bright);}
-.header-desc{font-size:12px;line-height:2;color:var(--text);margin-top:20px;max-width:560px;font-weight:300;}
-.btn-row{display:flex;gap:14px;margin-top:28px;flex-wrap:wrap;}
-.github-link, .wokwi-link{display:inline-flex;align-items:center;gap:10px;padding:12px 24px;font-size:9px;letter-spacing:4px;text-transform:uppercase;font-weight:500;text-decoration:none;transition:all 0.3s;}
-.github-link{border:1px solid var(--border-blue);color:var(--blue);}
-.github-link:hover{background:rgba(74,143,212,0.08);}
-.wokwi-link{border:1px solid #2a6040;color:#4ac890;background:rgba(0,180,100,0.04);}
-.wokwi-link:hover{background:rgba(74,200,144,0.1);}
-.repo-card{background:linear-gradient(145deg,#0f1220,#090c17);border:1px solid var(--border-blue);padding:32px 28px;position:relative;}
-.stat-row{display:flex;flex-direction:column;gap:10px;margin-top:4px;}
-.stat-item{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);}
-.stat-key{font-size:8px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);}
-.stat-val{font-size:11px;color:var(--text-light);font-family:'Courier Prime',monospace;}
-.spec-bar{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--border);margin-top:48px;}
-.spec-item{padding:24px 0;text-align:center;border-right:1px solid var(--border);}
-.spec-num{font-family:'Cormorant Garamond',serif;font-size:32px;color:var(--blue-bright);}
-.spec-label{font-size:7px;letter-spacing:4px;text-transform:uppercase;color:var(--muted);margin-top:6px;}
-.ornament{display:flex;align-items:center;gap:14px;padding:18px 72px;}
-.orn-line{flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--border-blue),transparent);}
-.orn-text{font-size:8px;letter-spacing:5px;text-transform:uppercase;color:var(--blue);}
-main{padding:0 72px 72px;}
-.section-head{display:flex;align-items:baseline;gap:20px;margin:56px 0 32px;}
-.section-head h2{font-family:'Cormorant Garamond',serif;font-size:28px;color:var(--white);font-style:italic;}
-.section-head .sh-line{flex:1;height:1px;background:linear-gradient(90deg,var(--border-blue),transparent);}
-.wokwi-hero{background:linear-gradient(135deg,#0a1225,#071020);border:1px solid var(--border-blue);padding:40px 48px;display:grid;grid-template-columns:1fr auto;gap:40px;align-items:center;position:relative;}
-.wokwi-hero-title{font-family:'Cormorant Garamond',serif;font-size:32px;color:var(--white);margin-bottom:14px;}
-.wokwi-hero-desc{font-size:12px;line-height:2;color:var(--text);max-width:520px;margin-bottom:24px;}
-.wf-tag{font-size:8px;letter-spacing:3px;text-transform:uppercase;border:1px solid var(--border-blue);padding:6px 14px;color:var(--text-light);margin-right:8px;display:inline-block;margin-bottom:8px;}
-.wokwi-cta{display:inline-flex;align-items:center;gap:12px;background:rgba(74,200,144,0.08);border:1px solid #2a6040;padding:14px 28px;font-size:9px;letter-spacing:4px;text-transform:uppercase;color:#4ac890;text-decoration:none;transition:0.3s;}
-.wokwi-preview-screen{width:220px;height:150px;background:#020408;border:1px solid var(--border-blue);padding:12px;}
-.terminal-text{font-family:'Courier Prime',monospace;font-size:9px;line-height:1.6;color:#4ac890;}
-.file-block{background:#050709;border:1px solid var(--border);margin-top:24px;}
-.file-block-header{background:rgba(74,143,212,0.05);padding:14px 24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;}
-.code-body{padding:24px;font-family:'Courier Prime',monospace;font-size:12px;line-height:1.8;color:#5a7a58;white-space:pre-wrap;}
-footer{border-top:1px solid var(--border-blue);padding:44px 72px;display:flex;justify-content:space-between;background:var(--surface);}
-@media(max-width:900px){.header-inner, .wokwi-hero, .spec-bar{grid-template-columns:1fr;}.top-bar, header, main, footer, .ornament{padding:20px;}}
+*{margin:0;padding:0;box-sizing:border-box}
+
+body{
+  background:#05070d;
+  color:#9fb3d9;
+  font-family:'Montserrat',sans-serif;
+  overflow-x:hidden;
+}
+
+/* Background stars */
+body::after{
+  content:"";
+  position:fixed;
+  inset:0;
+  background-image:
+    radial-gradient(1px 1px at 20% 30%, #6fb0f0 0%, transparent 100%),
+    radial-gradient(1px 1px at 80% 70%, #4a8fd4 0%, transparent 100%),
+    radial-gradient(1px 1px at 50% 50%, #6fb0f0 0%, transparent 100%);
+  opacity:0.2;
+  pointer-events:none;
+}
+
+header{
+  padding:80px 24px;
+  text-align:center;
+}
+
+h1{
+  font-family:'Cormorant Garamond',serif;
+  font-size:64px;
+  color:#e8f0ff;
+}
+
+h1 span{
+  color:#6fb0f0;
+}
+
+.subtitle{
+  margin-top:12px;
+  letter-spacing:4px;
+  font-size:12px;
+  text-transform:uppercase;
+}
+
+/* Drone Animation */
+.drone{
+  margin:80px auto;
+  width:120px;
+  height:120px;
+  position:relative;
+  animation:float 3s ease-in-out infinite;
+}
+
+@keyframes float{
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(-20px)}
+}
+
+.arm{
+  position:absolute;
+  width:100%;
+  height:2px;
+  background:#4a8fd4;
+  top:50%;
+  left:0;
+}
+
+.arm.vertical{
+  transform:rotate(90deg);
+}
+
+.motor{
+  width:20px;
+  height:20px;
+  border:2px solid #6fb0f0;
+  border-radius:50%;
+  position:absolute;
+}
+
+.motor::after{
+  content:"";
+  position:absolute;
+  width:30px;
+  height:4px;
+  background:#6fb0f0;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  animation:spin 0.2s linear infinite;
+}
+
+@keyframes spin{
+  from{transform:translate(-50%,-50%) rotate(0deg)}
+  to{transform:translate(-50%,-50%) rotate(360deg)}
+}
+
+.motor.tl{top:-10px;left:-10px}
+.motor.tr{top:-10px;right:-10px}
+.motor.bl{bottom:-10px;left:-10px}
+.motor.br{bottom:-10px;right:-10px}
+
+.section{
+  padding:60px 24px;
+  max-width:900px;
+  margin:auto;
+  text-align:center;
+}
+
+.section h2{
+  font-family:'Cormorant Garamond',serif;
+  font-size:32px;
+  margin-bottom:20px;
+  color:#e8f0ff;
+}
+
+.section p{
+  line-height:1.8;
+  font-size:14px;
+}
+
+.features{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:20px;
+  margin-top:40px;
+}
+
+.card{
+  border:1px solid #1e2a44;
+  padding:24px;
+  background:#0a0f1c;
+  transition:0.3s;
+}
+
+.card:hover{
+  border-color:#6fb0f0;
+  transform:translateY(-6px);
+}
+
+.card h3{
+  color:#6fb0f0;
+  margin-bottom:10px;
+}
+
+footer{
+  text-align:center;
+  padding:40px 20px;
+  border-top:1px solid #1e2a44;
+  margin-top:60px;
+}
+
 </style>
 </head>
 <body>
 
-<div class="top-bar">
-  <span><span class="status-dot"></span>JOYALVARGHESE07 / Robotics</span>
-  <span>Wokwi ID: 460318666113414145 · Active</span>
-</div>
-
 <header>
-  <div class="header-inner">
-    <div class="fade-up d1">
-      <h1>Quadcopter<br/><em>Control System</em></h1>
-      <p class="header-desc">
-        A high-fidelity Arduino simulation featuring <strong>PID flight stabilization</strong> and <strong>Complementary Filter</strong> sensor fusion. Built to simulate real-world quadcopter physics in a browser environment, utilizing an MPU-6050 IMU and HC-SR04 altitude sensing.
-      </p>
-      <div class="btn-row">
-        <a class="github-link" href="https://github.com/JOYALVARGHESE07/Robotics" target="_blank">View Repository</a>
-        <a class="wokwi-link" href="https://wokwi.com/projects/460318666113414145" target="_blank">Launch Simulator</a>
-      </div>
-    </div>
+  <h1>Joyal <span>Varghese</span></h1>
+  <div class="subtitle">Drone Systems · Simulation · Control Engineering</div>
 
-    <div class="repo-card fade-up d2">
-      <div class="rc-name">Simulation V1.0</div>
-      <div class="stat-row">
-        <div class="stat-item"><span class="stat-key">MCU</span><span class="stat-val">Arduino Uno</span></div>
-        <div class="stat-item"><span class="stat-key">IMU</span><span class="stat-val">MPU-6050</span></div>
-        <div class="stat-item"><span class="stat-key">Mixer</span><span class="stat-val">Quad-X Config</span></div>
-        <div class="stat-item"><span class="stat-key">Frequency</span><span class="stat-val">50 Hz</span></div>
-      </div>
-    </div>
-  </div>
-
-  <div class="spec-bar fade-up d3">
-    <div class="spec-item"><div class="spec-num">4</div><div class="spec-label">ESC Servos</div></div>
-    <div class="spec-item"><div class="spec-num">PID</div><div class="spec-label">Stabilization</div></div>
-    <div class="spec-item"><div class="spec-num">I2C</div><div class="spec-label">Protocol</div></div>
-    <div class="spec-item"><div class="spec-num">0.96</div><div class="spec-label">Filter Alpha</div></div>
+  <div class="drone">
+    <div class="arm"></div>
+    <div class="arm vertical"></div>
+    <div class="motor tl"></div>
+    <div class="motor tr"></div>
+    <div class="motor bl"></div>
+    <div class="motor br"></div>
   </div>
 </header>
 
-<div class="ornament fade-up d3">
-  <div class="orn-line"></div>
-  <div class="orn-text">Embedded Logic Analysis</div>
-  <div class="orn-line"></div>
-</div>
+<section class="section">
+  <h2>Quadcopter Drone Simulation</h2>
+  <p>
+    A fully simulated Arduino-based quadcopter system featuring PID stabilisation,
+    real-time sensor fusion, and motor control logic. Designed to demonstrate
+    control systems engineering through an interactive and visual environment.
+  </p>
+</section>
 
-<main>
-  <div class="section-head fade-up d4">
-    <h2>Wokwi Flight Core</h2>
-    <div class="sh-line"></div>
-  </div>
-
-  <div class="wokwi-hero fade-up d4">
-    <div>
-      <div class="wokwi-hero-title">Live Physics Simulation</div>
-      <div class="wokwi-hero-desc">
-        Interact with the flight controller in real-time. Toggle the arming switch, adjust the throttle potentiometer to lift, and observe the ESC responses as the PID algorithm compensates for IMU tilt.
-      </div>
-      <div class="wokwi-features">
-        <span class="wf-tag">Ultrasonic Alt Hold</span>
-        <span class="wf-tag">16x2 LCD Telemetry</span>
-        <span class="wf-tag">Manual Arm/Disarm</span>
-        <span class="wf-tag">Complementary Filter</span>
-      </div>
-      <a class="wokwi-cta" href="https://wokwi.com/projects/460318666113414145" target="_blank">Open Project 460318666113414145</a>
+<section class="section">
+  <h2>Core Features</h2>
+  <div class="features">
+    <div class="card">
+      <h3>PID Control</h3>
+      <p>Maintains stable flight by continuously correcting roll and pitch.</p>
     </div>
-
-    <div class="wokwi-preview-screen">
-      <div class="terminal-text">
-        [ARMED] Roll: 0.4 Pitch: -1.2<br/>
-        Alt: 1.42m  Throttle: 65%<br/>
-        <span style="color:#6fb0f0">FL: 1650 FR: 1642</span><br/>
-        <span style="color:#6fb0f0">RL: 1655 RR: 1638</span><br/>
-        >>> PID Update Stable
-      </div>
+    <div class="card">
+      <h3>Sensor Fusion</h3>
+      <p>Combines gyroscope and accelerometer data for accurate orientation.</p>
+    </div>
+    <div class="card">
+      <h3>Motor Mixing</h3>
+      <p>Distributes control signals across four motors in real-time.</p>
+    </div>
+    <div class="card">
+      <h3>Simulation Ready</h3>
+      <p>Runs entirely in-browser using Arduino simulation tools.</p>
     </div>
   </div>
+</section>
 
-  <div class="section-head fade-up d5">
-    <h2>Control Logic (X-Config Mixer)</h2>
-    <div class="sh-line"></div>
-  </div>
-
-  <div class="file-block fade-up d5">
-    <div class="file-block-header">
-      <span>sketch.ino</span>
-      <span style="color:var(--muted); font-size:9px">C++ / ARDUINO</span>
-    </div>
-    <div class="code-body">
-// Mixer: Quadcopter X-configuration
-speedFL = constrain(throttle - pitchPID + rollPID,  1000, 2000);
-speedFR = constrain(throttle - pitchPID - rollPID,  1000, 2000);
-speedRL = constrain(throttle + pitchPID + rollPID,  1000, 2000);
-speedRR = constrain(throttle + pitchPID - rollPID,  1000, 2000);
-
-// Complementary filter for stable angle estimation
-angleRoll  = 0.96 * (angleRoll  + gyroRoll * dt) + 0.04 * accelRoll;
-anglePitch = 0.96 * (anglePitch + gyroPitch * dt) + 0.04 * accelPitch;</div>
-  </div>
-</main>
+<section class="section">
+  <h2>Engineering Vision</h2>
+  <p>
+    This project represents the intersection of embedded systems, control theory,
+    and simulation. Built to explore real-world drone dynamics without hardware
+    constraints, it reflects a strong foundation in robotics and system design.
+  </p>
+</section>
 
 <footer>
-  <div class="footer-left">
-    <div class="footer-name">Joyal Varghese</div>
-  </div>
-  <div class="footer-right">
-    <p>© 2026 Drone Simulation Project</p>
-  </div>
+  <p>© Joyal Varghese — Drone Simulation Project</p>
 </footer>
 
 </body>
