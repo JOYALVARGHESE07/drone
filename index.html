@@ -1,267 +1,108 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Drone System — Joyal Varghese</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ultra Premium Joyal Varghese Animation</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Arial', sans-serif;
+      background: radial-gradient(#0a0a0a, #111);
+      color: #fff;
+      overflow-x: hidden;
+    }
 
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&family=Inter:wght@300;400;500;600&family=Orbitron:wght@400;600&display=swap" rel="stylesheet"/>
+    h1 {
+      text-align: center;
+      font-size: 4em;
+      margin-top: 50px;
+      text-shadow: 0 0 20px #ff00ff, 0 0 30px #00ffff;
+      animation: glow 2s infinite alternate;
+    }
 
-<style>
-*{margin:0;padding:0;box-sizing:border-box}
+    @keyframes glow {
+      0% { text-shadow: 0 0 10px #ff00ff, 0 0 20px #00ffff; }
+      100% { text-shadow: 0 0 40px #ff00ff, 0 0 60px #00ffff; }
+    }
 
-:root{
-  --bg:#05070d;
-  --card:#0c1224;
-  --accent:#4ac8ff;
-  --accent2:#00ffc3;
-  --text:#d6e8ff;
-  --muted:#7f95c0;
-}
+    .wokwi-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 50px 0;
+      animation: float 3s ease-in-out infinite alternate;
+    }
 
-body{
-  background:var(--bg);
-  color:var(--text);
-  font-family:'Inter',sans-serif;
-  overflow-x:hidden;
-}
+    @keyframes float {
+      0% { transform: translateY(0px); }
+      100% { transform: translateY(-20px); }
+    }
 
-/* ===== CINEMATIC BACKGROUND ===== */
-body::before{
-  content:'';
-  position:fixed;
-  inset:-20%;
-  background:
-    radial-gradient(circle at 20% 30%, rgba(74,200,255,0.15), transparent 40%),
-    radial-gradient(circle at 80% 70%, rgba(0,255,200,0.1), transparent 40%);
-  animation:bgMove 25s linear infinite;
-  z-index:-2;
-}
+    iframe {
+      border: 5px solid #00ffff;
+      border-radius: 20px;
+      width: 90%;
+      max-width: 800px;
+      height: 600px;
+      box-shadow: 0 0 50px #00ffff, 0 0 100px #ff00ff;
+      transition: transform 0.3s;
+    }
 
-@keyframes bgMove{
-  0%{transform:translate(0,0)}
-  50%{transform:translate(-5%,-5%)}
-  100%{transform:translate(0,0)}
-}
+    iframe:hover {
+      transform: scale(1.05) rotate(-1deg);
+      box-shadow: 0 0 70px #ff00ff, 0 0 120px #00ffff;
+    }
 
-/* ===== STARFIELD ===== */
-body::after{
-  content:'';
-  position:fixed;
-  inset:0;
-  background-image:
-    radial-gradient(1px 1px at 10% 20%, rgba(255,255,255,0.4), transparent),
-    radial-gradient(1px 1px at 60% 80%, rgba(255,255,255,0.3), transparent),
-    radial-gradient(1px 1px at 90% 40%, rgba(255,255,255,0.25), transparent);
-  z-index:-1;
-}
+    /* Floating stars */
+    .stars {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: -1;
+      background: transparent;
+    }
 
-/* ===== HEADER ===== */
-header{
-  padding:80px 60px 40px;
-  position:relative;
-}
+    .star {
+      position: absolute;
+      width: 2px;
+      height: 2px;
+      background: white;
+      border-radius: 50%;
+      animation: twinkle 2s infinite alternate;
+    }
 
-/* PREMIUM NAME */
-.brand{
-  font-family:'Cormorant Garamond';
-  font-size:28px;
-  letter-spacing:2px;
-  color:var(--accent);
-  animation:fadeUp 1s ease forwards;
-}
-
-/* BIG TITLE */
-h1{
-  font-family:'Orbitron';
-  font-size:clamp(50px,6vw,80px);
-  margin-top:20px;
-  background:linear-gradient(90deg,var(--accent),var(--accent2));
-  -webkit-background-clip:text;
-  color:transparent;
-  animation:fadeUp 1s ease forwards;
-}
-
-h1 span{
-  display:block;
-  font-family:'Cormorant Garamond';
-  font-style:italic;
-  font-size:0.6em;
-}
-
-/* DESCRIPTION */
-.desc{
-  max-width:600px;
-  margin-top:20px;
-  color:var(--muted);
-  line-height:1.8;
-  animation:fadeUp 1s ease forwards;
-}
-
-/* BUTTON ROW */
-.btn-row{
-  margin-top:30px;
-  display:flex;
-  gap:20px;
-}
-
-/* GITHUB BUTTON */
-.btn{
-  padding:14px 28px;
-  border:1px solid var(--accent);
-  color:var(--accent);
-  text-decoration:none;
-  letter-spacing:2px;
-  font-size:12px;
-  transition:0.3s;
-}
-
-.btn:hover{
-  background:var(--accent);
-  color:black;
-}
-
-/* 🔥 WOKWI BUTTON (PREMIUM) */
-.wokwi-btn{
-  position:relative;
-  padding:14px 28px;
-  border:1px solid #00ffc3;
-  color:#00ffc3;
-  text-decoration:none;
-  letter-spacing:2px;
-  font-size:12px;
-  overflow:hidden;
-}
-
-/* glowing animation */
-.wokwi-btn::before{
-  content:'';
-  position:absolute;
-  inset:0;
-  background:linear-gradient(120deg,transparent,rgba(0,255,195,0.4),transparent);
-  transform:translateX(-100%);
-  animation:scan 3s infinite;
-}
-
-@keyframes scan{
-  to{transform:translateX(100%)}
-}
-
-.wokwi-btn:hover{
-  background:rgba(0,255,195,0.1);
-  box-shadow:0 0 20px rgba(0,255,195,0.4);
-}
-
-/* ===== DRONE ===== */
-.drone{
-  position:absolute;
-  right:100px;
-  top:120px;
-  width:260px;
-  height:260px;
-  animation:float 4s ease-in-out infinite;
-}
-
-@keyframes float{
-  0%,100%{transform:translateY(0)}
-  50%{transform:translateY(-20px)}
-}
-
-.arm{
-  position:absolute;
-  width:120px;
-  height:2px;
-  background:var(--accent);
-  top:50%;
-  left:50%;
-  transform-origin:left center;
-}
-
-.arm:nth-child(1){transform:rotate(0)}
-.arm:nth-child(2){transform:rotate(90deg)}
-.arm:nth-child(3){transform:rotate(180deg)}
-.arm:nth-child(4){transform:rotate(270deg)}
-
-.rotor{
-  position:absolute;
-  width:40px;
-  height:40px;
-  border:2px solid var(--accent2);
-  border-radius:50%;
-  animation:spin 0.25s linear infinite;
-}
-
-.rotor::after{
-  content:'';
-  position:absolute;
-  width:24px;
-  height:4px;
-  background:var(--accent2);
-  top:50%;
-  left:50%;
-  transform:translate(-50%,-50%);
-}
-
-@keyframes spin{
-  from{transform:rotate(0)}
-  to{transform:rotate(360deg)}
-}
-
-.r1{top:0;left:50%;transform:translate(-50%,0)}
-.r2{bottom:0;left:50%;transform:translate(-50%,0)}
-.r3{left:0;top:50%;transform:translate(0,-50%)}
-.r4{right:0;top:50%;transform:translate(0,-50%)}
-
-/* ===== FADE ===== */
-@keyframes fadeUp{
-  from{opacity:0;transform:translateY(30px)}
-  to{opacity:1;transform:translateY(0)}
-}
-
-/* RESPONSIVE */
-@media(max-width:900px){
-  header{padding:40px}
-  .drone{position:relative;right:auto;top:auto;margin:40px auto}
-}
-</style>
+    @keyframes twinkle {
+      0% { opacity: 0.3; }
+      100% { opacity: 1; }
+    }
+  </style>
 </head>
-
 <body>
+  <h1>Joyal Varghese Ultra Premium</h1>
 
-<header>
+  <div class="wokwi-container">
+    <iframe src="https://wokwi.com/projects/460318666113414145" allowfullscreen></iframe>
+  </div>
 
-<div class="brand">Joyal Varghese</div>
+  <div class="stars" id="stars"></div>
 
-<h1>
-  Quadcopter System
-  <span>Drone Simulation</span>
-</h1>
-
-<p class="desc">
-  Advanced Arduino-based quadcopter system featuring PID stabilization,
-  real-time sensor fusion, and high-frequency motor control simulation.
-</p>
-
-<div class="btn-row">
-  <a href="#" class="btn">GitHub</a>
-
-  <!-- 🔥 YOUR WOKWI LINK WITH ANIMATION -->
-  <a href="https://wokwi.com/projects/460318666113414145" target="_blank" class="wokwi-btn">
-    Launch Simulation
-  </a>
-</div>
-
-<!-- DRONE -->
-<div class="drone">
-  <div class="arm"></div>
-  <div class="arm"></div>
-  <div class="arm"></div>
-  <div class="arm"></div>
-
-  <div class="rotor r1"></div>
-  <div class="rotor r2"></div>
-  <div class="rotor r3"></div>
-  <div class="rotor r4"></div>
-</div>
-
-</header>
+  <script>
+    // Generate stars
+    const starsContainer = document.getElementById('stars');
+    for (let i = 0; i < 100; i++) {
+      const star = document.createElement('div');
+      star.classList.add('star');
+      star.style.top = Math.random() * 100 + 'vh';
+      star.style.left = Math.random() * 100 + 'vw';
+      star.style.width = 1 + Math.random() * 3 + 'px';
+      star.style.height = star.style.width;
+      star.style.animationDuration = 1 + Math.random() * 3 + 's';
+      starsContainer.appendChild(star);
+    }
+  </script>
+</body>
+</html>
