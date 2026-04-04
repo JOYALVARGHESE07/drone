@@ -1,108 +1,109 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ultra Premium Joyal Varghese Animation</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: 'Arial', sans-serif;
-      background: radial-gradient(#0a0a0a, #111);
-      color: #fff;
-      overflow-x: hidden;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ultra Premium Drone Animation</title>
+<style>
+  /* Reset and basic styles */
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: radial-gradient(#000020, #000); overflow: hidden; font-family: 'Arial', sans-serif; }
+  
+  /* Starfield */
+  .star { position: absolute; background: white; border-radius: 50%; }
+  
+  /* Premium name animation */
+  .name {
+    position: absolute;
+    top: 20%;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 4rem;
+    color: #fff;
+    font-weight: bold;
+    text-shadow: 0 0 10px #ff0, 0 0 20px #ff0, 0 0 30px #f0f;
+    animation: shimmer 3s infinite;
+  }
+  @keyframes shimmer {
+    0%,100% { text-shadow: 0 0 10px #ff0, 0 0 20px #ff0, 0 0 30px #f0f; }
+    50% { text-shadow: 0 0 20px #0ff, 0 0 40px #0ff, 0 0 60px #0ff; }
+  }
 
-    h1 {
-      text-align: center;
-      font-size: 4em;
-      margin-top: 50px;
-      text-shadow: 0 0 20px #ff00ff, 0 0 30px #00ffff;
-      animation: glow 2s infinite alternate;
-    }
+  /* Drone styles */
+  .drone {
+    position: absolute;
+    width: 50px;
+    height: 20px;
+    background: linear-gradient(90deg,#ff0,#f0f);
+    border-radius: 10px;
+    box-shadow: 0 0 20px #ff0, 0 0 40px #f0f;
+    animation: fly 10s infinite;
+  }
 
-    @keyframes glow {
-      0% { text-shadow: 0 0 10px #ff00ff, 0 0 20px #00ffff; }
-      100% { text-shadow: 0 0 40px #ff00ff, 0 0 60px #00ffff; }
-    }
+  @keyframes fly {
+    0% { transform: translate3d(0,0,0) rotate(0deg); }
+    25% { transform: translate3d(300px, 200px, 50px) rotate(10deg); }
+    50% { transform: translate3d(600px, 100px, 0) rotate(-10deg); }
+    75% { transform: translate3d(300px, 400px, 30px) rotate(5deg); }
+    100% { transform: translate3d(0,0,0) rotate(0deg); }
+  }
 
-    .wokwi-container {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      margin: 50px 0;
-      animation: float 3s ease-in-out infinite alternate;
-    }
-
-    @keyframes float {
-      0% { transform: translateY(0px); }
-      100% { transform: translateY(-20px); }
-    }
-
-    iframe {
-      border: 5px solid #00ffff;
-      border-radius: 20px;
-      width: 90%;
-      max-width: 800px;
-      height: 600px;
-      box-shadow: 0 0 50px #00ffff, 0 0 100px #ff00ff;
-      transition: transform 0.3s;
-    }
-
-    iframe:hover {
-      transform: scale(1.05) rotate(-1deg);
-      box-shadow: 0 0 70px #ff00ff, 0 0 120px #00ffff;
-    }
-
-    /* Floating stars */
-    .stars {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      z-index: -1;
-      background: transparent;
-    }
-
-    .star {
-      position: absolute;
-      width: 2px;
-      height: 2px;
-      background: white;
-      border-radius: 50%;
-      animation: twinkle 2s infinite alternate;
-    }
-
-    @keyframes twinkle {
-      0% { opacity: 0.3; }
-      100% { opacity: 1; }
-    }
-  </style>
+  /* Wokwi embed container */
+  .wokwi-container {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    width: 400px;
+    height: 300px;
+    border: 2px solid #fff;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 0 20px #0ff;
+  }
+</style>
 </head>
 <body>
-  <h1>Joyal Varghese Ultra Premium</h1>
 
-  <div class="wokwi-container">
-    <iframe src="https://wokwi.com/projects/460318666113414145" allowfullscreen></iframe>
-  </div>
+<div class="name">Joyal Varghese</div>
 
-  <div class="stars" id="stars"></div>
+<!-- Drone elements -->
+<div class="drone" style="animation-delay:0s;"></div>
+<div class="drone" style="animation-delay:2s;"></div>
+<div class="drone" style="animation-delay:4s;"></div>
 
-  <script>
-    // Generate stars
-    const starsContainer = document.getElementById('stars');
-    for (let i = 0; i < 100; i++) {
-      const star = document.createElement('div');
-      star.classList.add('star');
-      star.style.top = Math.random() * 100 + 'vh';
-      star.style.left = Math.random() * 100 + 'vw';
-      star.style.width = 1 + Math.random() * 3 + 'px';
-      star.style.height = star.style.width;
-      star.style.animationDuration = 1 + Math.random() * 3 + 's';
-      starsContainer.appendChild(star);
-    }
-  </script>
+<!-- Starfield -->
+<script>
+  const stars = [];
+  const numStars = 100;
+  for(let i=0;i<numStars;i++){
+    let star = document.createElement('div');
+    star.classList.add('star');
+    let size = Math.random()*3+1;
+    star.style.width = size+'px';
+    star.style.height = size+'px';
+    star.style.top = Math.random()*window.innerHeight+'px';
+    star.style.left = Math.random()*window.innerWidth+'px';
+    star.style.opacity = Math.random();
+    document.body.appendChild(star);
+    stars.push(star);
+  }
+
+  function animateStars(){
+    stars.forEach(star=>{
+      let top = parseFloat(star.style.top);
+      top += 0.5;
+      if(top>window.innerHeight) top = 0;
+      star.style.top = top+'px';
+    });
+    requestAnimationFrame(animateStars);
+  }
+  animateStars();
+</script>
+
+<!-- Wokwi Simulator Embed -->
+<div class="wokwi-container">
+  <iframe src="https://wokwi.com/projects/460318666113414145" width="100%" height="100%" frameborder="0"></iframe>
+</div>
+
 </body>
 </html>
