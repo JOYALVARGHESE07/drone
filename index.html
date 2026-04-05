@@ -4,810 +4,1172 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Drone Sim — Joyal Varghese</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400;1,500&family=Bebas+Neue&family=DM+Sans:wght@200;300;400;500&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Syne:wght@400;500;700;800&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-
 :root{
-  --black:#08080a;
-  --black2:#0e0e12;
-  --black3:#14141a;
-  --silver-dark:#6b6b78;
-  --silver:#a8a8b8;
-  --silver-light:#d4d4e0;
-  --silver-bright:#ebebf2;
-  --white:#f5f5fa;
-  --gold:#c9a84c;
-  --gold-light:#e8c97a;
-  --gold-dim:#8a6a28;
-  --gold-glow:rgba(201,168,76,0.15);
-  --gold-border:rgba(201,168,76,0.3);
-  --arduino-teal:#00979d;
-  --arduino-teal-dim:rgba(0,151,157,0.12);
+  --void:#050507;
+  --deep:#08080d;
+  --layer1:#0d0d14;
+  --layer2:#12121a;
+  --layer3:#1a1a25;
+  --border-subtle:rgba(255,255,255,0.05);
+  --border-mid:rgba(255,255,255,0.09);
+  --border-strong:rgba(255,255,255,0.15);
+  --text-0:#f0f0f8;
+  --text-1:#a8a8c0;
+  --text-2:#5a5a78;
+  --gold:#d4a843;
+  --gold-l:#f0cc7a;
+  --gold-d:#8b6a20;
+  --gold-glow:rgba(212,168,67,0.12);
+  --gold-border:rgba(212,168,67,0.25);
+  --teal:#00c4d0;
+  --teal-dim:rgba(0,196,208,0.1);
+  --teal-border:rgba(0,196,208,0.2);
+  --accent:#7c5cfc;
+  --danger:#ff4d6d;
+  --success:#22d97b;
 }
-
 html{scroll-behavior:smooth}
 body{
-  background:var(--black);
-  color:var(--silver-light);
-  font-family:'DM Sans',sans-serif;
-  font-weight:300;
+  background:var(--void);
+  color:var(--text-1);
+  font-family:'Space Grotesk',sans-serif;
+  font-weight:400;
   overflow-x:hidden;
+  cursor:none;
 }
 
-/* GRAIN OVERLAY */
-body::before{
-  content:'';position:fixed;inset:0;z-index:9998;pointer-events:none;
-  opacity:.35;
-  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)' opacity='0.04'/%3E%3C/svg%3E");
+/* CUSTOM CURSOR */
+#cursor{
+  position:fixed;width:10px;height:10px;
+  border-radius:50%;background:var(--gold);
+  pointer-events:none;z-index:99999;
+  transform:translate(-50%,-50%);
+  transition:transform 0.1s;
+  mix-blend-mode:difference;
+}
+#cursor-ring{
+  position:fixed;width:36px;height:36px;
+  border-radius:50%;border:1px solid var(--gold-border);
+  pointer-events:none;z-index:99998;
+  transform:translate(-50%,-50%);
+  transition:all 0.18s ease;
+}
+body:hover #cursor-ring.hovering{
+  width:52px;height:52px;
+  border-color:var(--gold);
 }
 
-/* KEYFRAMES */
-@keyframes fadeUp{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:translateY(0)}}
-@keyframes goldShimmer{0%,100%{opacity:.6}50%{opacity:1}}
-@keyframes scanLine{0%{transform:translateY(-100%)}100%{transform:translateY(100vh)}}
-@keyframes rotorSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
-@keyframes borderPulse{0%,100%{border-color:var(--gold-border)}50%{border-color:rgba(201,168,76,.6)}}
-@keyframes counterUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-@keyframes ledBlink{0%,90%,100%{opacity:1}91%,99%{opacity:.2}}
+/* PARTICLE CANVAS */
+#particle-bg{
+  position:fixed;inset:0;z-index:0;
+  pointer-events:none;
+}
 
-.fu{animation:fadeUp 1s cubic-bezier(.16,1,.3,1) forwards;opacity:0;}
-.d1{animation-delay:.05s}.d2{animation-delay:.15s}.d3{animation-delay:.25s}
-.d4{animation-delay:.35s}.d5{animation-delay:.5s}.d6{animation-delay:.65s}
-
-/* SCANLINE EFFECT */
+/* SCANLINE */
 .scanline{
-  position:fixed;top:0;left:0;right:0;height:3px;
-  background:linear-gradient(90deg,transparent,rgba(201,168,76,0.04),transparent);
-  animation:scanLine 8s linear infinite;
-  pointer-events:none;z-index:9997;
+  position:fixed;top:0;left:0;right:0;
+  height:2px;
+  background:linear-gradient(90deg,transparent 0%,rgba(212,168,67,0.06) 50%,transparent 100%);
+  animation:scanLine 12s linear infinite;
+  pointer-events:none;z-index:9998;
 }
+@keyframes scanLine{0%{top:-2px}100%{top:100vh}}
 
-/* ── NAV ── */
+/* NAV */
 nav{
   position:fixed;top:0;left:0;right:0;z-index:500;
-  height:64px;
-  background:rgba(8,8,10,0.88);
-  backdrop-filter:blur(24px) saturate(120%);
-  border-bottom:0.5px solid rgba(201,168,76,0.18);
+  height:60px;
   display:flex;align-items:center;justify-content:space-between;
-  padding:0 64px;
+  padding:0 48px;
+  background:rgba(5,5,7,0.7);
+  backdrop-filter:blur(32px) saturate(140%);
+  border-bottom:0.5px solid var(--border-subtle);
 }
-.nav-logo{
+.nav-brand{
   display:flex;align-items:center;gap:14px;
+  text-decoration:none;
 }
-.nav-logo-mark{
-  width:32px;height:32px;
+.nav-brand-icon{
+  width:30px;height:30px;
   border:1px solid var(--gold-border);
-  display:flex;align-items:center;justify-content:center;
+  display:grid;place-items:center;
+  position:relative;
 }
-.nav-logo-mark svg{width:18px;height:18px;stroke:var(--gold);fill:none;stroke-width:1.2;}
-.nav-name{
-  font-family:'Playfair Display',serif;
-  font-size:16px;font-weight:400;
-  color:var(--white);letter-spacing:.5px;
+.nav-brand-icon::before{
+  content:'';position:absolute;
+  width:14px;height:14px;
+  background:var(--gold);
+  clip-path:polygon(50% 0%,100% 100%,0% 100%);
+  opacity:0.8;
 }
-.nav-links{display:flex;gap:36px;list-style:none;}
+.nav-brand-name{
+  font-family:'Syne',sans-serif;
+  font-size:15px;font-weight:700;
+  color:var(--text-0);letter-spacing:.5px;
+}
+.nav-links{
+  display:flex;align-items:center;gap:32px;list-style:none;
+}
 .nav-links a{
-  font-size:11px;letter-spacing:2px;text-transform:uppercase;
-  color:var(--silver-dark);text-decoration:none;
-  transition:color .25s;font-weight:400;
+  font-size:11px;letter-spacing:2.5px;text-transform:uppercase;
+  color:var(--text-2);text-decoration:none;
+  transition:color 0.2s;font-weight:500;
 }
 .nav-links a:hover{color:var(--gold);}
-.nav-cta{
-  display:flex;align-items:center;gap:10px;
-  border:1px solid var(--gold-border);
-  padding:9px 22px;
-  font-size:10px;letter-spacing:3px;text-transform:uppercase;
-  color:var(--gold);font-weight:500;text-decoration:none;
-  transition:all .25s;
+.nav-pill{
+  display:flex;align-items:center;gap:8px;
+  background:var(--gold);
+  color:#0a0800;
+  padding:8px 20px;
+  font-size:10px;letter-spacing:2.5px;text-transform:uppercase;font-weight:600;
+  text-decoration:none;
+  clip-path:polygon(0 0,calc(100% - 12px) 0,100% 12px,100% 100%,0 100%);
+  transition:opacity 0.2s;
 }
-.nav-cta:hover{background:var(--gold-glow);border-color:var(--gold);}
-.nav-cta svg{width:12px;height:12px;stroke:var(--gold);fill:none;stroke-width:2;}
+.nav-pill:hover{opacity:0.85;}
+.nav-pill svg{width:10px;height:10px;fill:#0a0800;}
+
+/* STATUS BAR */
+.status-bar{
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+  z-index:400;
+  display:flex;align-items:center;gap:24px;
+  background:rgba(8,8,13,0.85);
+  backdrop-filter:blur(20px);
+  border:0.5px solid var(--border-mid);
+  padding:10px 28px;
+  font-family:'JetBrains Mono',monospace;
+  font-size:10px;
+  color:var(--text-2);
+  white-space:nowrap;
+}
+.status-item{display:flex;align-items:center;gap:7px;}
+.status-dot{width:5px;height:5px;border-radius:50%;}
+.status-dot.green{background:var(--success);box-shadow:0 0 6px var(--success);}
+.status-dot.gold{background:var(--gold);box-shadow:0 0 6px var(--gold);}
+.status-dot.teal{background:var(--teal);box-shadow:0 0 6px var(--teal);}
+.status-val{color:var(--text-0);}
 
 /* ── HERO ── */
 .hero{
   min-height:100vh;
   display:grid;grid-template-columns:1fr 1fr;
   align-items:center;
-  padding:100px 64px 64px;
-  position:relative;overflow:hidden;
-  background:radial-gradient(ellipse at 60% 40%,rgba(201,168,76,.04) 0%,transparent 60%),
-             radial-gradient(ellipse at 20% 80%,rgba(0,151,157,.03) 0%,transparent 50%);
+  padding:100px 80px 60px;
+  position:relative;z-index:1;
+  gap:60px;
 }
-
-/* Grid lines background */
-.hero::before{
-  content:'';position:absolute;inset:0;
-  background-image:
-    linear-gradient(rgba(201,168,76,.04) 1px,transparent 1px),
-    linear-gradient(90deg,rgba(201,168,76,.04) 1px,transparent 1px);
-  background-size:80px 80px;
-  mask-image:radial-gradient(ellipse at center,black 20%,transparent 75%);
+.hero-eyebrow{
+  display:inline-flex;align-items:center;gap:10px;
+  margin-bottom:24px;
+  padding:7px 16px;
+  border:0.5px solid var(--border-mid);
+  background:rgba(212,168,67,0.05);
 }
-
-.hero-left{position:relative;z-index:2;}
-.hero-overline{
-  display:inline-flex;align-items:center;gap:12px;
-  margin-bottom:28px;
-}
-.hero-overline-line{width:40px;height:1px;background:var(--gold);}
-.hero-overline-text{
-  font-size:10px;letter-spacing:4px;text-transform:uppercase;
-  color:var(--gold);font-weight:500;
+.eyebrow-dot{width:4px;height:4px;border-radius:50%;background:var(--gold);}
+.eyebrow-text{
+  font-size:9px;letter-spacing:3.5px;text-transform:uppercase;
+  color:var(--gold);font-weight:600;
+  font-family:'JetBrains Mono',monospace;
 }
 .hero-h1{
-  font-family:'Bebas Neue',sans-serif;
-  font-size:clamp(72px,9vw,130px);
-  line-height:.92;letter-spacing:2px;
-  color:var(--white);
-  margin-bottom:4px;
+  font-family:'Syne',sans-serif;
+  font-size:clamp(64px,8.5vw,120px);
+  font-weight:800;
+  line-height:.88;letter-spacing:-3px;
+  color:var(--text-0);
+  margin-bottom:6px;
 }
-.hero-h1 .gold-line{
-  display:block;
-  background:linear-gradient(90deg,var(--gold-light),var(--gold),var(--gold-dim));
+.hero-h1 .outline{
+  -webkit-text-stroke:1px rgba(212,168,67,0.5);
+  color:transparent;
+}
+.hero-h1 .gold{
+  background:linear-gradient(135deg,var(--gold-l),var(--gold),var(--gold-d));
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
 }
 .hero-sub{
-  font-family:'Playfair Display',serif;
-  font-size:clamp(16px,2vw,22px);
-  font-style:italic;font-weight:400;
-  color:var(--silver);
-  margin-bottom:36px;margin-top:8px;
+  font-family:'Syne',sans-serif;
+  font-size:clamp(13px,1.4vw,17px);
+  font-weight:400;
+  color:var(--text-2);
+  letter-spacing:3px;text-transform:uppercase;
+  margin-bottom:32px;margin-top:12px;
 }
 .hero-desc{
-  font-size:15px;line-height:1.85;color:var(--silver-dark);
-  max-width:440px;font-weight:300;margin-bottom:48px;
+  font-size:15px;line-height:1.9;color:var(--text-1);
+  max-width:440px;font-weight:300;margin-bottom:44px;
 }
-.hero-desc span{color:var(--arduino-teal);}
-
-.btn-gold{
-  display:inline-flex;align-items:center;gap:12px;
-  background:linear-gradient(135deg,var(--gold-dim),var(--gold),var(--gold-dim));
-  background-size:200% 100%;
-  color:var(--black);
-  padding:15px 32px;
-  font-size:10px;letter-spacing:4px;text-transform:uppercase;font-weight:600;
+.hero-desc mark{
+  background:none;color:var(--teal);font-weight:500;
+}
+.btn-row{display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
+.btn-primary{
+  display:inline-flex;align-items:center;gap:10px;
+  background:var(--gold);
+  color:#06040a;
+  padding:14px 28px;
+  font-size:10px;letter-spacing:3px;text-transform:uppercase;font-weight:700;
   text-decoration:none;
-  transition:background-position .4s;
-}
-.btn-gold:hover{background-position:100% 0;}
-.btn-gold svg{width:14px;height:14px;stroke:var(--black);fill:none;stroke-width:2.5;}
-.btn-outline{
-  display:inline-flex;align-items:center;gap:12px;
-  border:1px solid rgba(168,168,184,.3);
-  padding:15px 32px;
-  font-size:10px;letter-spacing:4px;text-transform:uppercase;font-weight:500;
-  color:var(--silver);text-decoration:none;
-  transition:all .25s;margin-left:16px;
-}
-.btn-outline:hover{border-color:var(--silver);color:var(--white);}
-
-/* HERO RIGHT — Canvas */
-.hero-right{
-  position:relative;z-index:2;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-}
-#drone-canvas{
-  display:block;
-  width:min(480px,44vw);
-  height:min(480px,44vw);
-}
-.canvas-hint{
-  font-size:10px;letter-spacing:3px;text-transform:uppercase;
-  color:var(--silver-dark);margin-top:12px;
-  display:flex;align-items:center;gap:8px;
-}
-.canvas-hint::before,.canvas-hint::after{content:'';flex:1;height:1px;background:rgba(168,168,184,.15);}
-
-/* ── ARDUINO SECTION ── */
-.arduino-section{
-  padding:100px 64px;
-  display:grid;grid-template-columns:1fr 1fr;gap:80px;
-  align-items:center;
-  border-top:0.5px solid rgba(255,255,255,.05);
+  clip-path:polygon(0 0,calc(100% - 16px) 0,100% 16px,100% 100%,0 100%);
+  transition:all 0.2s;
   position:relative;
-}
-.arduino-section::before{
-  content:'';position:absolute;top:0;left:0;right:0;height:1px;
-  background:linear-gradient(90deg,transparent,var(--gold-border),transparent);
-}
-
-.arduino-visual{position:relative;}
-#chip-canvas{
-  width:100%;max-width:440px;height:340px;display:block;
-}
-
-.arduino-content .section-tag{
-  display:inline-flex;align-items:center;gap:10px;margin-bottom:20px;
-}
-.section-tag-line{width:32px;height:1px;background:var(--gold);}
-.section-tag-text{font-size:10px;letter-spacing:4px;text-transform:uppercase;color:var(--gold);font-weight:500;}
-.section-h2{
-  font-family:'Playfair Display',serif;
-  font-size:clamp(32px,4vw,52px);
-  font-weight:400;color:var(--white);
-  line-height:1.1;letter-spacing:-.5px;
-  margin-bottom:20px;
-}
-.section-h2 em{font-style:italic;color:var(--gold);}
-.section-desc{font-size:15px;line-height:1.85;color:var(--silver-dark);font-weight:300;margin-bottom:36px;}
-
-/* SPEC TABLE */
-.spec-table{border:1px solid rgba(255,255,255,.06);overflow:hidden;}
-.spec-row{
-  display:grid;grid-template-columns:1fr 1fr;
-  border-bottom:0.5px solid rgba(255,255,255,.05);
-  transition:background .2s;
-}
-.spec-row:last-child{border-bottom:none;}
-.spec-row:hover{background:rgba(201,168,76,.03);}
-.spec-key{
-  padding:14px 20px;
-  font-size:10px;letter-spacing:2px;text-transform:uppercase;
-  color:var(--silver-dark);font-weight:500;
-  border-right:0.5px solid rgba(255,255,255,.05);
-}
-.spec-val{
-  padding:14px 20px;
-  font-family:'Courier Prime',monospace;
-  font-size:13px;color:var(--silver-bright);
-}
-.spec-val.gold{color:var(--gold);}
-.spec-val.teal{color:var(--arduino-teal);}
-
-/* ── WOKWI SECTION ── */
-.wokwi-section{
-  padding:100px 64px;
-  background:var(--black2);
-  border-top:0.5px solid rgba(255,255,255,.05);
-  position:relative;overflow:hidden;
-}
-.wokwi-section::before{
-  content:'';position:absolute;top:0;left:0;right:0;height:1px;
-  background:linear-gradient(90deg,transparent,var(--gold-border),transparent);
-}
-.wokwi-section::after{
-  content:'';position:absolute;right:-200px;top:-200px;
-  width:600px;height:600px;
-  background:radial-gradient(circle,rgba(0,151,157,.06),transparent 60%);
-  pointer-events:none;
-}
-
-.wokwi-inner{
-  display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:start;
-  position:relative;z-index:1;
-}
-.wokwi-title{
-  font-family:'Bebas Neue',sans-serif;
-  font-size:clamp(48px,6vw,80px);
-  line-height:.95;letter-spacing:2px;
-  color:var(--white);margin-bottom:16px;
-}
-.wokwi-title span{
-  background:linear-gradient(90deg,var(--gold-light),var(--gold));
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
-}
-.wokwi-desc{font-size:15px;line-height:1.85;color:var(--silver-dark);font-weight:300;margin-bottom:28px;}
-
-.chip-tags{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:36px;}
-.chip-tag{
-  background:rgba(255,255,255,.04);
-  border:0.5px solid rgba(255,255,255,.1);
-  padding:7px 16px;
-  font-size:10px;letter-spacing:2px;text-transform:uppercase;
-  color:var(--silver);font-weight:500;
-}
-.chip-tag.gold{border-color:var(--gold-border);color:var(--gold);}
-.chip-tag.teal{border-color:rgba(0,151,157,.4);color:var(--arduino-teal);}
-
-/* TERMINAL */
-.terminal{
-  background:#050508;
-  border:1px solid rgba(255,255,255,.08);
   overflow:hidden;
 }
-.terminal-bar{
-  background:#0e0e14;
-  border-bottom:0.5px solid rgba(255,255,255,.08);
-  padding:12px 16px;
+.btn-primary::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,transparent 0%,rgba(255,255,255,0.2) 50%,transparent 100%);
+  transform:translateX(-100%);
+  transition:transform 0.4s;
+}
+.btn-primary:hover::before{transform:translateX(100%);}
+.btn-primary svg{width:12px;height:12px;stroke:#06040a;fill:none;stroke-width:2.5;}
+.btn-ghost{
+  display:inline-flex;align-items:center;gap:10px;
+  border:0.5px solid var(--border-strong);
+  padding:14px 28px;
+  font-size:10px;letter-spacing:3px;text-transform:uppercase;font-weight:600;
+  color:var(--text-1);text-decoration:none;
+  transition:all 0.2s;
+}
+.btn-ghost:hover{border-color:var(--gold-border);color:var(--gold);}
+.btn-ghost svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2;}
+
+/* HERO RIGHT */
+.hero-right{position:relative;}
+.drone-stage{
+  position:relative;
+  width:min(520px,46vw);
+  aspect-ratio:1;
+  margin:0 auto;
+}
+#drone-canvas{display:block;width:100%;height:100%;}
+.drone-hud{
+  position:absolute;
+  font-family:'JetBrains Mono',monospace;
+  font-size:9px;
+  color:var(--teal);
+  letter-spacing:1px;
+}
+.hud-tl{top:20px;left:20px;}
+.hud-tr{top:20px;right:20px;text-align:right;}
+.hud-bl{bottom:20px;left:20px;}
+.hud-br{bottom:20px;right:20px;text-align:right;}
+.hud-line{color:var(--text-2);margin-bottom:3px;}
+.hud-val{color:var(--text-0);}
+.drone-crosshair{
+  position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  width:80px;height:80px;
+  pointer-events:none;
+}
+.drone-crosshair::before,.drone-crosshair::after{
+  content:'';position:absolute;background:var(--gold-border);
+}
+.drone-crosshair::before{top:50%;left:0;right:0;height:1px;transform:translateY(-50%);}
+.drone-crosshair::after{left:50%;top:0;bottom:0;width:1px;transform:translateX(-50%);}
+.ch-corner{
+  position:absolute;
+  width:12px;height:12px;
+  border-color:rgba(212,168,67,0.4);
+  border-style:solid;
+}
+.ch-corner.tl{top:0;left:0;border-width:1px 0 0 1px;}
+.ch-corner.tr{top:0;right:0;border-width:1px 1px 0 0;}
+.ch-corner.bl{bottom:0;left:0;border-width:0 0 1px 1px;}
+.ch-corner.br{bottom:0;right:0;border-width:0 1px 1px 0;}
+.canvas-label{
+  text-align:center;
+  font-size:9px;letter-spacing:3px;text-transform:uppercase;
+  color:var(--text-2);
+  margin-top:10px;
+  font-family:'JetBrains Mono',monospace;
+}
+
+/* ── METRICS STRIP ── */
+.metrics-strip{
+  display:grid;grid-template-columns:repeat(5,1fr);
+  position:relative;z-index:1;
+  border-top:0.5px solid var(--border-subtle);
+  border-bottom:0.5px solid var(--border-subtle);
+}
+.metric-cell{
+  padding:40px 28px;
+  border-right:0.5px solid var(--border-subtle);
+  text-align:center;
+  position:relative;
+  transition:background 0.3s;
+}
+.metric-cell:last-child{border-right:none;}
+.metric-cell:hover{background:var(--layer1);}
+.metric-num{
+  font-family:'Syne',sans-serif;
+  font-size:44px;font-weight:800;
+  color:var(--text-0);line-height:1;
+  margin-bottom:6px;
+}
+.metric-num sup{font-size:20px;color:var(--gold);}
+.metric-label{
+  font-size:9px;letter-spacing:3px;text-transform:uppercase;
+  color:var(--text-2);font-weight:500;
+  font-family:'JetBrains Mono',monospace;
+}
+.metric-bar{
+  position:absolute;bottom:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent);
+  opacity:0;transition:opacity 0.3s;
+}
+.metric-cell:hover .metric-bar{opacity:1;}
+
+/* ── PID TUNER SECTION ── */
+.pid-section{
+  padding:100px 80px;
+  position:relative;z-index:1;
+  background:var(--layer1);
+  border-top:0.5px solid var(--border-subtle);
+}
+.section-label{
+  display:inline-flex;align-items:center;gap:10px;
+  margin-bottom:16px;
+}
+.section-label-line{width:28px;height:1px;background:var(--gold);}
+.section-label-text{
+  font-size:9px;letter-spacing:4px;text-transform:uppercase;
+  color:var(--gold);font-weight:600;
+  font-family:'JetBrains Mono',monospace;
+}
+.section-h2{
+  font-family:'Syne',sans-serif;
+  font-size:clamp(36px,5vw,64px);
+  font-weight:800;color:var(--text-0);
+  line-height:.95;letter-spacing:-2px;
+  margin-bottom:16px;
+}
+.section-h2 em{font-style:normal;color:var(--gold);}
+.section-p{
+  font-size:15px;line-height:1.85;color:var(--text-1);
+  font-weight:300;max-width:520px;
+  margin-bottom:48px;
+}
+.pid-layout{
+  display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:start;
+}
+.pid-tuner{
+  background:var(--layer2);
+  border:0.5px solid var(--border-mid);
+  padding:32px;
+}
+.pid-header{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:28px;
+  padding-bottom:16px;
+  border-bottom:0.5px solid var(--border-subtle);
+}
+.pid-title{
+  font-family:'Syne',sans-serif;font-weight:700;
+  font-size:16px;color:var(--text-0);
+}
+.pid-arm-btn{
+  display:flex;align-items:center;gap:8px;
+  padding:7px 16px;
+  font-size:9px;letter-spacing:2px;text-transform:uppercase;font-weight:600;
+  font-family:'JetBrains Mono',monospace;
+  cursor:pointer;border:none;
+  transition:all 0.2s;
+}
+.pid-arm-btn.disarmed{
+  background:rgba(255,77,109,0.1);
+  border:0.5px solid rgba(255,77,109,0.3);
+  color:var(--danger);
+}
+.pid-arm-btn.armed{
+  background:rgba(34,217,123,0.1);
+  border:0.5px solid rgba(34,217,123,0.3);
+  color:var(--success);
+}
+.pid-arm-btn .arm-dot{
+  width:6px;height:6px;border-radius:50%;
+  background:currentColor;
+}
+
+.slider-group{margin-bottom:24px;}
+.slider-header{
+  display:flex;justify-content:space-between;align-items:baseline;
+  margin-bottom:10px;
+}
+.slider-label{
+  font-size:10px;letter-spacing:2px;text-transform:uppercase;
+  color:var(--text-2);font-weight:500;
+  font-family:'JetBrains Mono',monospace;
+}
+.slider-val{
+  font-family:'JetBrains Mono',monospace;
+  font-size:14px;color:var(--gold);font-weight:500;
+}
+input[type=range]{
+  -webkit-appearance:none;width:100%;height:2px;
+  background:var(--border-mid);outline:none;cursor:pointer;
+}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;width:14px;height:14px;
+  background:var(--gold);border-radius:50%;
+  cursor:pointer;
+  transition:transform 0.1s;
+}
+input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.3);}
+input[type=range]::-moz-range-thumb{
+  width:14px;height:14px;background:var(--gold);
+  border-radius:50%;border:none;cursor:pointer;
+}
+
+.throttle-group{
+  margin-top:28px;padding-top:28px;
+  border-top:0.5px solid var(--border-subtle);
+}
+.throttle-visual{
+  display:flex;align-items:flex-end;gap:6px;
+  height:60px;margin-top:12px;
+}
+.motor-bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;}
+.motor-bar{
+  width:100%;
+  background:linear-gradient(to top,var(--gold),var(--gold-l));
+  border-radius:1px;
+  transition:height 0.15s cubic-bezier(0.16,1,0.3,1);
+  min-height:3px;
+}
+.motor-label{
+  font-size:8px;letter-spacing:1px;
+  color:var(--text-2);font-family:'JetBrains Mono',monospace;
+}
+
+/* PID GRAPH */
+.pid-graph-wrap{
+  background:var(--layer2);
+  border:0.5px solid var(--border-mid);
+  padding:24px;
+}
+.graph-header{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:16px;
+}
+.graph-title{
+  font-family:'JetBrains Mono',monospace;
+  font-size:10px;letter-spacing:2px;text-transform:uppercase;
+  color:var(--text-2);
+}
+.graph-legend{
+  display:flex;gap:16px;
+}
+.legend-item{
+  display:flex;align-items:center;gap:6px;
+  font-family:'JetBrains Mono',monospace;
+  font-size:9px;color:var(--text-2);
+}
+.legend-dot{width:8px;height:2px;}
+#pid-graph{width:100%;height:180px;display:block;}
+
+.response-badges{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:8px;
+  margin-top:16px;
+}
+.resp-badge{
+  padding:12px;text-align:center;
+  background:var(--layer3);
+  border:0.5px solid var(--border-subtle);
+}
+.resp-label{
+  font-size:8px;letter-spacing:2px;text-transform:uppercase;
+  color:var(--text-2);font-family:'JetBrains Mono',monospace;
+  margin-bottom:4px;
+}
+.resp-val{
+  font-family:'JetBrains Mono',monospace;
+  font-size:13px;font-weight:500;color:var(--text-0);
+}
+
+/* ── ARDUINO SECTION ── */
+.hw-section{
+  padding:100px 80px;
+  position:relative;z-index:1;
+  display:grid;grid-template-columns:1fr 1fr;gap:80px;
+  align-items:center;
+}
+.hw-canvas-wrap{
+  position:relative;
+}
+#chip-canvas{width:100%;max-width:460px;height:360px;display:block;}
+
+/* SPEC GRID */
+.spec-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:0;
+  border:0.5px solid var(--border-mid);
+  overflow:hidden;
+}
+.spec-item{
+  padding:16px 20px;
+  border-right:0.5px solid var(--border-subtle);
+  border-bottom:0.5px solid var(--border-subtle);
+  transition:background 0.2s;
+}
+.spec-item:nth-child(even){border-right:none;}
+.spec-item:hover{background:var(--layer2);}
+.spec-k{
+  font-size:9px;letter-spacing:2px;text-transform:uppercase;
+  color:var(--text-2);font-weight:500;
+  font-family:'JetBrains Mono',monospace;
+  margin-bottom:4px;
+}
+.spec-v{
+  font-family:'JetBrains Mono',monospace;
+  font-size:13px;font-weight:500;color:var(--text-0);
+}
+.spec-v.gold{color:var(--gold);}
+.spec-v.teal{color:var(--teal);}
+
+/* ── TERMINAL SECTION ── */
+.terminal-section{
+  padding:100px 80px;
+  background:var(--layer1);
+  border-top:0.5px solid var(--border-subtle);
+  position:relative;z-index:1;
+}
+.terminal-layout{
+  display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:start;
+}
+.terminal-window{
+  background:#030305;
+  border:0.5px solid var(--border-mid);
+  overflow:hidden;
+  position:relative;
+}
+.term-bar{
+  background:#0a0a10;
+  border-bottom:0.5px solid var(--border-subtle);
+  padding:11px 16px;
   display:flex;align-items:center;gap:8px;
 }
-.t-dot{width:11px;height:11px;border-radius:50%;}
-.t-dot.r{background:#ff5f57;}.t-dot.y{background:#ffbd2e;}.t-dot.g{background:#28ca41;}
-.t-title{
+.tdot{width:10px;height:10px;border-radius:50%;}
+.tdot.r{background:#ff5f57;}
+.tdot.y{background:#febc2e;}
+.tdot.g{background:#28c840;}
+.term-title-bar{
   flex:1;text-align:center;
-  font-size:10px;letter-spacing:2px;color:rgba(255,255,255,.2);
-  text-transform:uppercase;
+  font-family:'JetBrains Mono',monospace;
+  font-size:9px;letter-spacing:2px;
+  color:rgba(255,255,255,0.2);text-transform:uppercase;
 }
-.terminal-body{
-  padding:24px 28px;
-  font-family:'Courier Prime',monospace;
-  font-size:12.5px;line-height:2;
+.term-body{
+  padding:20px 22px;
+  font-family:'JetBrains Mono',monospace;
+  font-size:11.5px;line-height:2;
+  height:320px;overflow-y:auto;
 }
-.tc{color:#6ab0ff;}.td{color:#3a3a50;}.tg{color:#33ff88;}.tw{color:var(--silver-bright);}.tgold{color:var(--gold);}
+.term-body::-webkit-scrollbar{width:3px;}
+.term-body::-webkit-scrollbar-track{background:transparent;}
+.term-body::-webkit-scrollbar-thumb{background:var(--border-mid);}
+.tc{color:#4d9fff;}
+.td{color:rgba(255,255,255,0.2);}
+.tg{color:var(--success);}
+.tw{color:var(--text-0);}
+.tgold{color:var(--gold);}
+.tr{color:var(--danger);}
+.tc2{color:var(--teal);}
+.cursor-blink{
+  display:inline-block;width:6px;height:11px;
+  background:var(--gold);
+  animation:blink 1.1s step-end infinite;
+  vertical-align:middle;margin-left:2px;
+}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
 
-/* ── FEATURES ── */
-.features-section{
-  padding:100px 64px;
-  border-top:0.5px solid rgba(255,255,255,.05);
-  position:relative;
-}
-.features-section::before{
-  content:'';position:absolute;top:0;left:0;right:0;height:1px;
-  background:linear-gradient(90deg,transparent,var(--gold-border),transparent);
-}
-.features-header{text-align:center;margin-bottom:72px;}
-.features-title{
-  font-family:'Bebas Neue',sans-serif;
-  font-size:clamp(52px,7vw,88px);
-  letter-spacing:4px;color:var(--white);line-height:1;
-  margin-bottom:12px;
-}
-.features-title span{
-  background:linear-gradient(90deg,var(--gold-light),var(--gold));
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
-}
-.features-sub{font-size:15px;color:var(--silver-dark);font-weight:300;max-width:480px;margin:0 auto;}
-
+/* FEAT GRID */
 .feat-grid{
   display:grid;grid-template-columns:repeat(3,1fr);gap:1px;
-  background:rgba(255,255,255,.04);
+  background:var(--border-subtle);
+  position:relative;z-index:1;
 }
 .feat-card{
-  background:var(--black);
-  padding:44px 36px;
+  background:var(--deep);
+  padding:40px 32px;
   position:relative;overflow:hidden;
-  transition:background .3s;
+  transition:background 0.3s;
+  cursor:default;
 }
-.feat-card::before{
-  content:'';position:absolute;top:0;left:0;right:0;height:2px;
-  background:linear-gradient(90deg,var(--gold-dim),var(--gold),transparent);
-  opacity:0;transition:opacity .3s;
+.feat-card:hover{background:var(--layer1);}
+.feat-accent{
+  position:absolute;top:0;left:0;right:0;height:1px;
+  opacity:0;transition:opacity 0.3s;
 }
-.feat-card:hover{background:var(--black2);}
-.feat-card:hover::before{opacity:1;}
-.feat-card::after{
-  content:'';position:absolute;bottom:-40px;right:-40px;
-  width:120px;height:120px;
-  background:radial-gradient(circle,var(--gold-glow),transparent 70%);
-  opacity:0;transition:opacity .3s;
+.feat-accent.gold{background:linear-gradient(90deg,var(--gold-d),var(--gold),transparent);}
+.feat-accent.teal{background:linear-gradient(90deg,var(--teal),transparent);}
+.feat-card:hover .feat-accent{opacity:1;}
+.feat-n{
+  font-family:'JetBrains Mono',monospace;
+  font-size:9px;color:var(--text-2);
+  margin-bottom:20px;letter-spacing:2px;
 }
-.feat-card:hover::after{opacity:1;}
+.feat-icon{
+  width:40px;height:40px;
+  display:grid;place-items:center;
+  border:0.5px solid var(--border-mid);
+  margin-bottom:18px;
+  transition:border-color 0.3s;
+}
+.feat-card:hover .feat-icon{border-color:var(--gold-border);}
+.feat-icon svg{width:18px;height:18px;stroke:var(--gold);fill:none;stroke-width:1.4;}
+.feat-t{
+  font-family:'Syne',sans-serif;
+  font-size:17px;font-weight:700;
+  color:var(--text-0);margin-bottom:10px;
+}
+.feat-d{font-size:12.5px;line-height:1.85;color:var(--text-2);font-weight:400;}
 
-.feat-num{
-  font-family:'Courier Prime',monospace;
-  font-size:11px;color:var(--gold-dim);
-  margin-bottom:28px;letter-spacing:2px;
-}
-.feat-icon-wrap{
-  width:48px;height:48px;
-  border:1px solid rgba(201,168,76,.2);
-  display:flex;align-items:center;justify-content:center;
-  margin-bottom:24px;
-  transition:border-color .3s;
-}
-.feat-card:hover .feat-icon-wrap{border-color:var(--gold);}
-.feat-icon-wrap svg{width:22px;height:22px;stroke:var(--gold);fill:none;stroke-width:1.3;}
-.feat-title{
-  font-family:'Playfair Display',serif;
-  font-size:20px;font-weight:400;
-  color:var(--white);margin-bottom:12px;letter-spacing:-.2px;
-}
-.feat-desc{font-size:13px;line-height:1.85;color:var(--silver-dark);font-weight:300;}
-
-/* ── PINOUT SECTION ── */
+/* PINOUT */
 .pinout-section{
-  padding:100px 64px;
-  background:var(--black2);
-  border-top:0.5px solid rgba(255,255,255,.05);
-  position:relative;
+  padding:100px 80px;
+  background:var(--layer1);
+  border-top:0.5px solid var(--border-subtle);
+  position:relative;z-index:1;
 }
-.pinout-section::before{
-  content:'';position:absolute;top:0;left:0;right:0;height:1px;
-  background:linear-gradient(90deg,transparent,rgba(0,151,157,.4),transparent);
-}
-.pinout-inner{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:start;}
-.pinout-h2{
-  font-family:'Playfair Display',serif;
-  font-size:clamp(28px,3.5vw,44px);
-  font-weight:400;color:var(--white);
-  line-height:1.15;margin-bottom:20px;
-}
-.pinout-h2 em{font-style:italic;color:var(--arduino-teal);}
-.pinout-desc{font-size:15px;line-height:1.85;color:var(--silver-dark);font-weight:300;margin-bottom:36px;}
-
+.pinout-grid{display:grid;grid-template-columns:1fr 1fr;gap:64px;}
 .pin-table{width:100%;border-collapse:collapse;}
-.pin-table th{
-  font-size:9px;letter-spacing:3px;text-transform:uppercase;
-  color:var(--silver-dark);font-weight:500;
-  padding:10px 16px;text-align:left;
-  border-bottom:1px solid rgba(255,255,255,.06);
+.pin-table thead th{
+  font-size:8px;letter-spacing:3px;text-transform:uppercase;
+  color:var(--text-2);font-weight:500;
+  font-family:'JetBrains Mono',monospace;
+  padding:8px 12px;text-align:left;
+  border-bottom:0.5px solid var(--border-mid);
 }
-.pin-table td{
-  padding:12px 16px;
-  font-family:'Courier Prime',monospace;
-  font-size:12px;
-  border-bottom:0.5px solid rgba(255,255,255,.04);
+.pin-table tbody td{
+  padding:10px 12px;
+  font-family:'JetBrains Mono',monospace;
+  font-size:11.5px;
+  border-bottom:0.5px solid var(--border-subtle);
+  transition:background 0.15s;
 }
-.pin-table tr:hover td{background:rgba(255,255,255,.02);}
-.pin-num{color:var(--gold);}
-.pin-name{color:var(--white);}
-.pin-use{color:var(--silver-dark);}
+.pin-table tbody tr:hover td{background:var(--layer2);}
+.pin-table tbody tr:last-child td{border-bottom:none;}
+.pin-n{color:var(--gold);}
+.pin-sig{color:var(--text-0);}
+.pin-dev{color:var(--text-2);}
 .pin-badge{
-  display:inline-block;
-  padding:3px 10px;font-size:9px;letter-spacing:1px;text-transform:uppercase;font-weight:500;
+  display:inline-block;padding:2px 8px;
+  font-size:8px;letter-spacing:1px;text-transform:uppercase;font-weight:600;
 }
-.pin-badge.digital{background:rgba(0,151,157,.1);color:var(--arduino-teal);}
-.pin-badge.analog{background:rgba(201,168,76,.1);color:var(--gold);}
-.pin-badge.power{background:rgba(255,100,100,.1);color:#ff7070;}
-.pin-badge.i2c{background:rgba(100,100,255,.1);color:#8888ff;}
+.badge-d{background:rgba(0,196,208,0.1);color:var(--teal);}
+.badge-a{background:rgba(212,168,67,0.1);color:var(--gold);}
+.badge-p{background:rgba(255,77,109,0.1);color:var(--danger);}
+.badge-i{background:rgba(124,92,252,0.1);color:var(--accent);}
 
-/* ── STATS BAND ── */
-.stats-band{
-  display:grid;grid-template-columns:repeat(5,1fr);
-  background:var(--black3);
-  border-top:0.5px solid rgba(255,255,255,.05);
-  border-bottom:0.5px solid rgba(255,255,255,.05);
+/* LIBS TABLE */
+.lib-table{width:100%;border-collapse:collapse;margin-bottom:32px;}
+.lib-table td{
+  padding:11px 14px;
+  font-family:'JetBrains Mono',monospace;font-size:11.5px;
+  border-bottom:0.5px solid var(--border-subtle);
 }
-.stat-cell{
-  padding:48px 24px;text-align:center;
-  border-right:0.5px solid rgba(255,255,255,.05);
-  position:relative;overflow:hidden;
-}
-.stat-cell:last-child{border-right:none;}
-.stat-cell::before{
-  content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);
-  width:40px;height:2px;
-  background:linear-gradient(90deg,transparent,var(--gold),transparent);
-}
-.stat-num{
-  font-family:'Bebas Neue',sans-serif;
-  font-size:52px;letter-spacing:2px;
-  color:var(--white);line-height:1;margin-bottom:8px;
-}
-.stat-unit{font-size:22px;color:var(--gold);}
-.stat-label{font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--silver-dark);}
+.lib-name{color:var(--gold);}
+.lib-desc{color:var(--text-2);}
 
-/* ── FOOTER ── */
+/* PID VALUES */
+.pid-vals-grid{
+  display:grid;grid-template-columns:repeat(2,1fr);gap:8px;
+}
+.pid-val-cell{
+  padding:12px 14px;
+  background:var(--layer2);
+  border:0.5px solid var(--border-subtle);
+}
+.pid-val-k{
+  font-size:8px;letter-spacing:2px;text-transform:uppercase;
+  color:var(--text-2);font-family:'JetBrains Mono',monospace;
+  margin-bottom:4px;
+}
+.pid-val-v{
+  font-family:'JetBrains Mono',monospace;
+  font-size:14px;font-weight:500;color:var(--text-0);
+}
+.pid-val-v.hl{color:var(--gold);}
+
+/* FOOTER */
 footer{
-  background:var(--black);
-  border-top:0.5px solid rgba(255,255,255,.06);
-  padding:64px;
+  background:var(--void);
+  border-top:0.5px solid var(--border-subtle);
+  padding:56px 80px;
+  position:relative;z-index:1;
 }
-.footer-top{
-  display:grid;grid-template-columns:1fr 1fr 1fr;gap:40px;
-  padding-bottom:48px;
-  border-bottom:0.5px solid rgba(255,255,255,.05);
-  margin-bottom:40px;
+.footer-inner{
+  display:grid;grid-template-columns:1fr auto;gap:40px;
+  align-items:end;
 }
-.footer-brand-name{
-  font-family:'Playfair Display',serif;
-  font-size:22px;font-weight:400;color:var(--white);
-  margin-bottom:8px;letter-spacing:.5px;
+.footer-brand{
+  font-family:'Syne',sans-serif;
+  font-size:28px;font-weight:800;
+  color:var(--text-0);letter-spacing:-1px;
+  margin-bottom:6px;
 }
-.footer-brand-sub{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--silver-dark);}
-.footer-col-title{font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);font-weight:500;margin-bottom:16px;}
-.footer-col p{font-size:12px;color:var(--silver-dark);line-height:2;font-family:'Courier Prime',monospace;}
-.footer-bottom{display:flex;justify-content:space-between;align-items:center;}
-.footer-bottom p{font-size:11px;color:rgba(255,255,255,.2);letter-spacing:1px;}
-.footer-gold-line{height:1px;background:linear-gradient(90deg,transparent,var(--gold-border),transparent);margin-bottom:40px;}
+.footer-sub{
+  font-size:10px;letter-spacing:3px;text-transform:uppercase;
+  color:var(--text-2);font-family:'JetBrains Mono',monospace;
+}
+.footer-links{
+  display:flex;gap:24px;
+  font-size:10px;letter-spacing:2px;text-transform:uppercase;
+  color:var(--text-2);
+  font-family:'JetBrains Mono',monospace;
+}
+.footer-bottom{
+  display:flex;justify-content:space-between;align-items:center;
+  margin-top:40px;padding-top:24px;
+  border-top:0.5px solid var(--border-subtle);
+}
+.footer-copy{
+  font-size:10px;letter-spacing:1.5px;
+  color:var(--text-2);font-family:'JetBrains Mono',monospace;
+}
+.footer-url{
+  font-family:'JetBrains Mono',monospace;
+  font-size:10px;color:var(--gold);letter-spacing:1px;
+}
 
+/* ANIMATIONS */
+@keyframes fadeUp{
+  from{opacity:0;transform:translateY(32px)}
+  to{opacity:1;transform:translateY(0)}
+}
+.fu{animation:fadeUp 0.9s cubic-bezier(0.16,1,0.3,1) both;}
+.d0{animation-delay:0.05s}.d1{animation-delay:0.15s}
+.d2{animation-delay:0.25s}.d3{animation-delay:0.4s}
+.d4{animation-delay:0.55s}.d5{animation-delay:0.7s}
+
+/* SCROLL REVEAL */
+.reveal{opacity:0;transform:translateY(24px);transition:opacity 0.8s cubic-bezier(0.16,1,0.3,1),transform 0.8s cubic-bezier(0.16,1,0.3,1);}
+.reveal.visible{opacity:1;transform:none;}
+
+/* RESPONSIVE */
 @media(max-width:1100px){
-  nav{padding:0 32px;}
-  .hero{grid-template-columns:1fr;padding:120px 32px 64px;text-align:center;}
-  #drone-canvas{width:min(360px,80vw);height:min(360px,80vw);}
-  .hero-desc{margin:0 auto 48px;}
-  .arduino-section,.wokwi-inner,.pinout-inner{grid-template-columns:1fr;gap:48px;}
-  .arduino-section,.wokwi-section,.features-section,.pinout-section{padding:72px 32px;}
-  .stats-band{grid-template-columns:repeat(3,1fr);}
+  nav{padding:0 28px;}
+  .hero{grid-template-columns:1fr;padding:100px 28px 48px;gap:40px;}
+  .drone-stage{width:min(380px,80vw);}
+  .pid-section,.hw-section,.terminal-section,.pinout-section{padding:64px 28px;}
+  .pid-layout,.hw-section{grid-template-columns:1fr;gap:40px;}
+  .terminal-layout,.pinout-grid{grid-template-columns:1fr;gap:40px;}
+  .metrics-strip{grid-template-columns:repeat(3,1fr);}
   .feat-grid{grid-template-columns:1fr 1fr;}
-  footer{padding:48px 32px;}
-  .footer-top{grid-template-columns:1fr;}
-  .footer-bottom{flex-direction:column;gap:12px;text-align:center;}
+  footer{padding:40px 28px;}
+  .footer-inner{grid-template-columns:1fr;}
 }
 @media(max-width:700px){
   .nav-links{display:none;}
   .feat-grid{grid-template-columns:1fr;}
-  .stats-band{grid-template-columns:repeat(2,1fr);}
+  .metrics-strip{grid-template-columns:repeat(2,1fr);}
+  .spec-grid{grid-template-columns:1fr;}
+  .spec-item:nth-child(even){border-right:none;}
+  .spec-item{border-right:none;}
+  .hero-h1{font-size:clamp(52px,16vw,80px);}
 }
 </style>
 </head>
 <body>
 
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+<canvas id="particle-bg"></canvas>
 <div class="scanline"></div>
 
 <!-- NAV -->
 <nav>
-  <div class="nav-logo">
-    <div class="nav-logo-mark">
-      <svg viewBox="0 0 24 24"><path d="M12 2l4 7H8l4-7z"/><circle cx="12" cy="17" r="4"/></svg>
-    </div>
-    <div class="nav-name">Joyal Varghese</div>
-  </div>
+  <a class="nav-brand" href="#">
+    <div class="nav-brand-icon"></div>
+    <span class="nav-brand-name">Joyal Varghese</span>
+  </a>
   <ul class="nav-links">
-    <li><a href="#arduino">Arduino</a></li>
-    <li><a href="#simulation">Simulation</a></li>
-    <li><a href="#features">Features</a></li>
+    <li><a href="#pid">PID Tuner</a></li>
+    <li><a href="#hardware">Hardware</a></li>
+    <li><a href="#features">Systems</a></li>
     <li><a href="#pinout">Pinout</a></li>
   </ul>
-  <a class="nav-cta" href="https://wokwi.com/projects/460318666113414145" target="_blank">
+  <a class="nav-pill" href="https://wokwi.com/projects/460318666113414145" target="_blank">
     <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-    Launch Sim
+    Launch
   </a>
 </nav>
+
+<!-- STATUS BAR -->
+<div class="status-bar" id="status-bar">
+  <div class="status-item">
+    <div class="status-dot green"></div>
+    <span>PID</span> <span class="status-val" id="s-pid">ACTIVE</span>
+  </div>
+  <div class="status-item">
+    <div class="status-dot gold"></div>
+    <span>THR</span> <span class="status-val" id="s-thr">62%</span>
+  </div>
+  <div class="status-item">
+    <div class="status-dot teal"></div>
+    <span>ALT</span> <span class="status-val" id="s-alt">3.98m</span>
+  </div>
+  <div class="status-item">
+    <span>ROLL</span> <span class="status-val" id="s-roll">0.0°</span>
+  </div>
+  <div class="status-item">
+    <span>PITCH</span> <span class="status-val" id="s-pitch">0.0°</span>
+  </div>
+  <div class="status-item">
+    <span>LOOP</span> <span class="status-val">50Hz</span>
+  </div>
+</div>
 
 <!-- HERO -->
 <section class="hero">
   <div class="hero-left">
-    <div class="hero-overline fu d1">
-      <span class="hero-overline-line"></span>
-      <span class="hero-overline-text">Engineering Portfolio · 2025</span>
+    <div class="hero-eyebrow fu d0">
+      <span class="eyebrow-dot"></span>
+      <span class="eyebrow-text">Engineering Portfolio · 2025</span>
     </div>
-    <h1 class="hero-h1 fu d2">
-      DRONE
-      <span class="gold-line">SYSTEM</span>
+    <h1 class="hero-h1 fu d1">
+      <span class="outline">DRONE</span><br/>
+      <span class="gold">SYSTEM</span>
     </h1>
-    <p class="hero-sub fu d3">Quadcopter Simulation &amp; Control</p>
-    <p class="hero-desc fu d4">
-      Built on <span>Arduino Uno</span> — featuring PID flight stabilisation,
+    <p class="hero-sub fu d2">Quadcopter Simulation &amp; Control</p>
+    <p class="hero-desc fu d3">
+      Built on <mark>Arduino Uno</mark> — featuring PID flight stabilisation,
       MPU-6050 gyroscope fusion, HC-SR04 altitude sensing, and real-time
-      ESC motor mixing. Simulated entirely in Wokwi.
+      ESC motor mixing. Simulated entirely in <mark>Wokwi</mark>.
+      Move the cursor to pilot the drone.
     </p>
-    <div class="fu d5">
-      <a class="btn-gold" href="https://wokwi.com/projects/460318666113414145" target="_blank">
+    <div class="btn-row fu d4">
+      <a class="btn-primary" href="https://wokwi.com/projects/460318666113414145" target="_blank">
         <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-        Launch simulation
+        Launch Simulation
       </a>
-      <a class="btn-outline" href="#features">Explore features</a>
+      <a class="btn-ghost" href="#pid">
+        <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Tune PID
+      </a>
     </div>
   </div>
 
-  <div class="hero-right fu d3">
-    <canvas id="drone-canvas"></canvas>
-    <p class="canvas-hint">Move cursor to control</p>
+  <div class="hero-right fu d2">
+    <div class="drone-stage">
+      <canvas id="drone-canvas" width="520" height="520"></canvas>
+      <div class="drone-hud hud-tl">
+        <div class="hud-line">ROLL</div>
+        <div class="hud-val" id="h-roll">0.0°</div>
+      </div>
+      <div class="drone-hud hud-tr">
+        <div class="hud-line">PITCH</div>
+        <div class="hud-val" id="h-pitch">0.0°</div>
+      </div>
+      <div class="drone-hud hud-bl">
+        <div class="hud-line">ALT</div>
+        <div class="hud-val" id="h-alt">3.98m</div>
+      </div>
+      <div class="drone-hud hud-br">
+        <div class="hud-line">LOOP</div>
+        <div class="hud-val">50Hz</div>
+      </div>
+      <div class="drone-crosshair">
+        <div class="ch-corner tl"></div>
+        <div class="ch-corner tr"></div>
+        <div class="ch-corner bl"></div>
+        <div class="ch-corner br"></div>
+      </div>
+    </div>
+    <p class="canvas-label">move cursor to pilot · interactive</p>
   </div>
 </section>
 
-<!-- STATS BAND -->
-<div class="stats-band fu d4">
-  <div class="stat-cell">
-    <div class="stat-num">4<span class="stat-unit">×</span></div>
-    <div class="stat-label">Motors</div>
+<!-- METRICS STRIP -->
+<div class="metrics-strip reveal">
+  <div class="metric-cell">
+    <div class="metric-num">4<sup>×</sup></div>
+    <div class="metric-label">Motors</div>
+    <div class="metric-bar"></div>
   </div>
-  <div class="stat-cell">
-    <div class="stat-num">50<span class="stat-unit">Hz</span></div>
-    <div class="stat-label">Loop rate</div>
+  <div class="metric-cell">
+    <div class="metric-num">50<sup>Hz</sup></div>
+    <div class="metric-label">Loop Rate</div>
+    <div class="metric-bar"></div>
   </div>
-  <div class="stat-cell">
-    <div class="stat-num">3<span class="stat-unit">-axis</span></div>
-    <div class="stat-label">PID control</div>
+  <div class="metric-cell">
+    <div class="metric-num">3<sup>ax</sup></div>
+    <div class="metric-label">PID Control</div>
+    <div class="metric-bar"></div>
   </div>
-  <div class="stat-cell">
-    <div class="stat-num">16<span class="stat-unit">MHz</span></div>
-    <div class="stat-label">Clock speed</div>
+  <div class="metric-cell">
+    <div class="metric-num">16<sup>M</sup></div>
+    <div class="metric-label">MHz Clock</div>
+    <div class="metric-bar"></div>
   </div>
-  <div class="stat-cell">
-    <div class="stat-num">I<span class="stat-unit">2</span>C</div>
-    <div class="stat-label">Sensor bus</div>
+  <div class="metric-cell">
+    <div class="metric-num">I<sup>2</sup>C</div>
+    <div class="metric-label">Sensor Bus</div>
+    <div class="metric-bar"></div>
   </div>
 </div>
 
-<!-- ARDUINO SECTION -->
-<section id="arduino" class="arduino-section fu d3">
-  <div class="arduino-visual">
-    <canvas id="chip-canvas"></canvas>
+<!-- PID TUNER -->
+<section id="pid" class="pid-section">
+  <div class="section-label reveal">
+    <span class="section-label-line"></span>
+    <span class="section-label-text">Interactive · PID Controller</span>
   </div>
-  <div class="arduino-content">
-    <div class="section-tag">
-      <span class="section-tag-line"></span>
-      <span class="section-tag-text">Hardware Core</span>
+  <h2 class="section-h2 reveal">TUNE THE<br/><em>FLIGHT LOOP</em></h2>
+  <p class="section-p reveal">Drag the sliders to adjust PID gains in real time. Watch the step-response graph react — overshoot, settling time, and steady-state error update live as you tune.</p>
+
+  <div class="pid-layout">
+    <div>
+      <div class="pid-tuner reveal">
+        <div class="pid-header">
+          <div class="pid-title">PID Controller</div>
+          <button class="pid-arm-btn armed" id="arm-btn" onclick="toggleArm()">
+            <div class="arm-dot"></div>
+            <span id="arm-label">ARMED</span>
+          </button>
+        </div>
+
+        <div class="slider-group">
+          <div class="slider-header">
+            <span class="slider-label">Proportional · Kp</span>
+            <span class="slider-val" id="kp-val">1.80</span>
+          </div>
+          <input type="range" min="0" max="5" step="0.01" value="1.80" id="kp" oninput="updatePID()">
+        </div>
+        <div class="slider-group">
+          <div class="slider-header">
+            <span class="slider-label">Integral · Ki</span>
+            <span class="slider-val" id="ki-val">0.05</span>
+          </div>
+          <input type="range" min="0" max="1" step="0.005" value="0.05" id="ki" oninput="updatePID()">
+        </div>
+        <div class="slider-group">
+          <div class="slider-header">
+            <span class="slider-label">Derivative · Kd</span>
+            <span class="slider-val" id="kd-val">0.35</span>
+          </div>
+          <input type="range" min="0" max="2" step="0.01" value="0.35" id="kd" oninput="updatePID()">
+        </div>
+
+        <div class="throttle-group">
+          <div class="slider-header">
+            <span class="slider-label">Throttle</span>
+            <span class="slider-val" id="thr-val">62%</span>
+          </div>
+          <input type="range" min="0" max="100" step="1" value="62" id="thr" oninput="updateThrottle()">
+          <div class="throttle-visual">
+            <div class="motor-bar-wrap">
+              <div class="motor-bar" id="m-fl" style="height:45px"></div>
+              <div class="motor-label">FL</div>
+            </div>
+            <div class="motor-bar-wrap">
+              <div class="motor-bar" id="m-fr" style="height:45px"></div>
+              <div class="motor-label">FR</div>
+            </div>
+            <div class="motor-bar-wrap">
+              <div class="motor-bar" id="m-rl" style="height:45px"></div>
+              <div class="motor-label">RL</div>
+            </div>
+            <div class="motor-bar-wrap">
+              <div class="motor-bar" id="m-rr" style="height:45px"></div>
+              <div class="motor-label">RR</div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-    <h2 class="section-h2">Arduino Uno<br/><em>R3 Platform</em></h2>
-    <p class="section-desc">
-      The ATmega328P microcontroller runs the full flight stack — sensor polling, PID computation, motor mixing, and safety logic — all within a 50 Hz real-time loop at 16 MHz.
-    </p>
-    <div class="spec-table">
-      <div class="spec-row"><div class="spec-key">MCU</div><div class="spec-val teal">ATmega328P</div></div>
-      <div class="spec-row"><div class="spec-key">Clock</div><div class="spec-val gold">16 MHz</div></div>
-      <div class="spec-row"><div class="spec-key">Flash</div><div class="spec-val">32 KB</div></div>
-      <div class="spec-row"><div class="spec-key">SRAM</div><div class="spec-val">2 KB</div></div>
-      <div class="spec-row"><div class="spec-key">Digital I/O</div><div class="spec-val gold">14 pins</div></div>
-      <div class="spec-row"><div class="spec-key">Analog In</div><div class="spec-val">6 channels</div></div>
-      <div class="spec-row"><div class="spec-key">PWM Pins</div><div class="spec-val teal">6 pins (ESC control)</div></div>
-      <div class="spec-row"><div class="spec-key">I2C Bus</div><div class="spec-val">SDA A4 · SCL A5</div></div>
-      <div class="spec-row"><div class="spec-key">Operating V</div><div class="spec-val gold">5V logic</div></div>
-      <div class="spec-row"><div class="spec-key">Simulator</div><div class="spec-val teal">Wokwi · Live</div></div>
+
+    <div>
+      <div class="pid-graph-wrap reveal">
+        <div class="graph-header">
+          <div class="graph-title">Step Response</div>
+          <div class="graph-legend">
+            <div class="legend-item">
+              <div class="legend-dot" style="background:var(--gold)"></div>
+              Setpoint
+            </div>
+            <div class="legend-item">
+              <div class="legend-dot" style="background:var(--teal)"></div>
+              Response
+            </div>
+          </div>
+        </div>
+        <canvas id="pid-graph"></canvas>
+        <div class="response-badges" id="resp-badges">
+          <div class="resp-badge">
+            <div class="resp-label">Rise Time</div>
+            <div class="resp-val" id="r-rise">—</div>
+          </div>
+          <div class="resp-badge">
+            <div class="resp-label">Overshoot</div>
+            <div class="resp-val" id="r-over">—</div>
+          </div>
+          <div class="resp-badge">
+            <div class="resp-label">SS Error</div>
+            <div class="resp-val" id="r-ss">—</div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </section>
 
-<!-- WOKWI SECTION -->
-<section id="simulation" class="wokwi-section">
-  <div class="wokwi-inner">
-    <div class="fu d3">
-      <div class="section-tag" style="margin-bottom:20px;">
-        <span class="section-tag-line"></span>
-        <span class="section-tag-text">Live Simulation</span>
-      </div>
-      <h2 class="wokwi-title">FLY IT<br/><span>NOW.</span></h2>
-      <p class="wokwi-desc">
-        The complete flight controller runs live in Wokwi. ARM the drone, push the throttle potentiometer, and watch the PID loop keep it level with real sensor fusion data from the MPU-6050.
-      </p>
-      <div class="chip-tags">
-        <span class="chip-tag teal">MPU-6050</span>
-        <span class="chip-tag teal">HC-SR04</span>
-        <span class="chip-tag gold">4× ESC</span>
-        <span class="chip-tag gold">PID loop</span>
-        <span class="chip-tag">I2C LCD</span>
-        <span class="chip-tag">ARM / DISARM</span>
-        <span class="chip-tag">Serial monitor</span>
-      </div>
-      <a class="btn-gold" href="https://wokwi.com/projects/460318666113414145" target="_blank" style="display:inline-flex;align-items:center;gap:12px;text-decoration:none;padding:15px 32px;font-size:10px;letter-spacing:4px;text-transform:uppercase;font-weight:600;color:var(--black);background:linear-gradient(135deg,var(--gold-dim),var(--gold),var(--gold-dim));background-size:200% 100%;">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-        Launch drone simulation
-      </a>
+<!-- HARDWARE -->
+<section id="hardware" class="hw-section reveal">
+  <div class="hw-canvas-wrap">
+    <canvas id="chip-canvas"></canvas>
+  </div>
+  <div>
+    <div class="section-label">
+      <span class="section-label-line"></span>
+      <span class="section-label-text">Hardware Core</span>
     </div>
+    <h2 class="section-h2">Arduino Uno<br/><em>R3 Platform</em></h2>
+    <p class="section-p">The ATmega328P runs the full flight stack — sensor polling, PID computation, motor mixing, and safety logic — all within a 50 Hz real-time loop at 16 MHz.</p>
+    <div class="spec-grid">
+      <div class="spec-item"><div class="spec-k">MCU</div><div class="spec-v teal">ATmega328P</div></div>
+      <div class="spec-item"><div class="spec-k">Clock</div><div class="spec-v gold">16 MHz</div></div>
+      <div class="spec-item"><div class="spec-k">Flash</div><div class="spec-v">32 KB</div></div>
+      <div class="spec-item"><div class="spec-k">SRAM</div><div class="spec-v">2 KB</div></div>
+      <div class="spec-item"><div class="spec-k">Digital I/O</div><div class="spec-v gold">14 pins</div></div>
+      <div class="spec-item"><div class="spec-k">Analog In</div><div class="spec-v">6 channels</div></div>
+      <div class="spec-item"><div class="spec-k">PWM Pins</div><div class="spec-v teal">6 (ESC)</div></div>
+      <div class="spec-item"><div class="spec-k">I2C Bus</div><div class="spec-v">SDA A4 · SCL A5</div></div>
+      <div class="spec-item"><div class="spec-k">Logic V</div><div class="spec-v gold">5V</div></div>
+      <div class="spec-item"><div class="spec-k">Simulator</div><div class="spec-v teal">Wokwi</div></div>
+    </div>
+  </div>
+</section>
 
-    <div class="terminal fu d4">
-      <div class="terminal-bar">
-        <div class="t-dot r"></div><div class="t-dot y"></div><div class="t-dot g"></div>
-        <div class="t-title">Arduino Serial Monitor · 9600 baud</div>
+<!-- TERMINAL -->
+<section class="terminal-section">
+  <div class="terminal-layout">
+    <div class="reveal">
+      <div class="section-label">
+        <span class="section-label-line"></span>
+        <span class="section-label-text">Serial Telemetry</span>
       </div>
-      <div class="terminal-body">
+      <h2 class="section-h2" style="font-size:clamp(32px,4vw,56px)">REAL-TIME<br/><em>TELEMETRY</em></h2>
+      <p class="section-p">Full telemetry at 9600 baud — roll, pitch, altitude, throttle, and all four motor values streamed every 20 ms for live debugging and PID tuning.</p>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:24px;">
+        <span style="padding:6px 14px;background:var(--teal-dim);border:0.5px solid var(--teal-border);font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--teal);font-family:'JetBrains Mono',monospace;">MPU-6050</span>
+        <span style="padding:6px 14px;background:var(--teal-dim);border:0.5px solid var(--teal-border);font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--teal);font-family:'JetBrains Mono',monospace;">HC-SR04</span>
+        <span style="padding:6px 14px;background:var(--gold-glow);border:0.5px solid var(--gold-border);font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);font-family:'JetBrains Mono',monospace;">4× ESC</span>
+        <span style="padding:6px 14px;background:var(--gold-glow);border:0.5px solid var(--gold-border);font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);font-family:'JetBrains Mono',monospace;">PID Loop</span>
+        <span style="padding:6px 14px;background:var(--layer3);border:0.5px solid var(--border-mid);font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--text-1);font-family:'JetBrains Mono',monospace;">I2C LCD</span>
+        <span style="padding:6px 14px;background:var(--layer3);border:0.5px solid var(--border-mid);font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--text-1);font-family:'JetBrains Mono',monospace;">ARM/DISARM</span>
+      </div>
+      <div style="margin-top:32px;">
+        <a class="btn-primary" href="https://wokwi.com/projects/460318666113414145" target="_blank" style="display:inline-flex;align-items:center;gap:10px;text-decoration:none;">
+          <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="#06040a" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          Fly It Now
+        </a>
+      </div>
+    </div>
+    <div class="terminal-window reveal">
+      <div class="term-bar">
+        <div class="tdot r"></div><div class="tdot y"></div><div class="tdot g"></div>
+        <div class="term-title-bar">Serial Monitor · 9600 baud</div>
+      </div>
+      <div class="term-body" id="term-body">
         <span class="td">▶ Drone Sim v1.0 — ATmega328P</span><br/>
-        <span class="td">Initializing I2C bus... OK</span><br/>
-        <span class="td">MPU-6050 detected at 0x68</span><br/>
-        <span class="td">HC-SR04 echo pin: D3</span><br/>
-        <span class="td">ESC pins: D9 D10 D11 D6</span><br/>
-        <span class="td">LCD detected at 0x27</span><br/>
-        <span class="td">Calibrating gyro...</span><br/>
-        <span class="tgold">───────────────────────</span><br/>
-        <span class="tg">[ARMED]</span> <span class="tw">system ready</span><br/>
-        <span class="tgold">───────────────────────</span><br/>
-        Roll: <span class="tw">0.0°</span>  Pitch: <span class="tw">0.0°</span><br/>
-        Altitude: <span class="tg">3.98 m</span><br/>
-        Throttle: <span class="tw">62%</span><br/>
-        <span class="td">──────────────────────</span><br/>
-        FL:<span class="tw">1420</span> FR:<span class="tw">1418</span><br/>
-        RL:<span class="tw">1422</span> RR:<span class="tw">1416</span><br/>
-        <span class="td">PID·OK  IMU·OK  ALT·OK</span><br/>
-        <span class="tgold">Loop: 50Hz  dt: 20ms</span>
+        <span class="td">──────────────────────────────</span><br/>
+        <span class="tc">Initializing I2C bus...</span> <span class="tg">OK</span><br/>
+        <span class="tc">MPU-6050</span> <span class="td">detected at</span> <span class="tgold">0x68</span><br/>
+        <span class="tc">HC-SR04</span> <span class="td">echo pin: D3</span><br/>
+        <span class="tc">ESC</span> <span class="td">pins: D9 D10 D11 D6</span><br/>
+        <span class="tc">LCD</span> <span class="td">detected at</span> <span class="tgold">0x27</span><br/>
+        <span class="tc2">Calibrating gyro...</span> <span class="tg">DONE</span><br/>
+        <span class="tgold">──────────────────────────────</span><br/>
+        <span class="tg">[ ARMED ]</span> <span class="tw">system ready</span><br/>
+        <span class="tgold">──────────────────────────────</span><br/>
       </div>
     </div>
   </div>
 </section>
 
 <!-- FEATURES -->
-<section id="features" class="features-section">
-  <div class="features-header fu d3">
-    <div class="section-tag" style="justify-content:center;">
-      <span class="section-tag-line"></span>
-      <span class="section-tag-text">System Features</span>
-      <span class="section-tag-line"></span>
+<section id="features">
+  <div style="padding:80px 80px 40px;position:relative;z-index:1;">
+    <div class="section-label reveal" style="justify-content:center;">
+      <span class="section-label-line"></span>
+      <span class="section-label-text">System Architecture</span>
+      <span class="section-label-line"></span>
     </div>
-    <h2 class="features-title">FLIGHT<br/><span>SYSTEMS</span></h2>
-    <p class="features-sub">Every subsystem engineered for precision — from sensor fusion to motor mixing.</p>
+    <h2 class="section-h2 reveal" style="text-align:center;font-size:clamp(52px,7vw,92px);letter-spacing:-3px;">FLIGHT<br/><em>SYSTEMS</em></h2>
+    <p class="reveal" style="font-size:15px;color:var(--text-2);max-width:480px;margin:0 auto 56px;text-align:center;font-weight:300;line-height:1.85;">Every subsystem engineered for precision — from IMU fusion to real-time motor mixing.</p>
   </div>
-
-  <div class="feat-grid fu d4">
-    <div class="feat-card">
-      <div class="feat-num">01 / IMU</div>
-      <div class="feat-icon-wrap"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/></svg></div>
-      <div class="feat-title">IMU Sensor Fusion</div>
-      <div class="feat-desc">MPU-6050 gyroscope and accelerometer fused via complementary filter. Real-time roll and pitch at 50 Hz. I2C address 0x68 on pins A4/A5.</div>
-    </div>
-    <div class="feat-card">
-      <div class="feat-num">02 / PID</div>
-      <div class="feat-icon-wrap"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
-      <div class="feat-title">PID Stabiliser</div>
-      <div class="feat-desc">Dual-axis PID controller with configurable Kp, Ki, Kd. Anti-windup integrator clamping. Runs every 20 ms for 50 Hz control authority.</div>
-    </div>
-    <div class="feat-card">
-      <div class="feat-num">03 / ESC</div>
-      <div class="feat-icon-wrap"><svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div>
-      <div class="feat-title">Motor Mixing</div>
-      <div class="feat-desc">X-frame quadcopter mixing on digital pins D9, D10, D11, D6. PWM signals 1000–2000 µs via Arduino Servo library. Rotor directions alternated for yaw authority.</div>
-    </div>
-    <div class="feat-card">
-      <div class="feat-num">04 / ALT</div>
-      <div class="feat-icon-wrap"><svg viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div>
-      <div class="feat-title">Altitude Sensing</div>
-      <div class="feat-desc">HC-SR04 ultrasonic on D2 (trigger) and D3 (echo). Median-filtered distance readings in metres. Max range 4 m with ±3 mm accuracy.</div>
-    </div>
-    <div class="feat-card">
-      <div class="feat-num">05 / LCD</div>
-      <div class="feat-icon-wrap"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div>
-      <div class="feat-title">I2C LCD Display</div>
-      <div class="feat-desc">LiquidCrystal_I2C 16×2 at address 0x27. Shows ARM state, altitude, roll, pitch, and throttle. Refreshes every 200 ms to prevent I2C bus saturation.</div>
-    </div>
-    <div class="feat-card">
-      <div class="feat-num">06 / SAFETY</div>
-      <div class="feat-icon-wrap"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
-      <div class="feat-title">ARM / DISARM</div>
-      <div class="feat-desc">Push-button on D4 with 50 ms debounce. Hard motor lock when disarmed. PID integrators zero on arm. LED indicator on D13 mirrors arm state.</div>
-    </div>
-    <div class="feat-card">
-      <div class="feat-num">07 / THROTTLE</div>
-      <div class="feat-icon-wrap"><svg viewBox="0 0 24 24"><line x1="12" y1="2" x2="12" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
-      <div class="feat-title">Throttle Control</div>
-      <div class="feat-desc">10 kΩ potentiometer on A0 maps 0–5V to 1000–2000 µs PWM range. Deadband at low throttle prevents inadvertent arm. Capped during PID saturation.</div>
-    </div>
-    <div class="feat-card">
-      <div class="feat-num">08 / SERIAL</div>
-      <div class="feat-icon-wrap"><svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg></div>
-      <div class="feat-title">Serial Telemetry</div>
-      <div class="feat-desc">Full telemetry stream at 9600 baud via USB. Roll, pitch, altitude, throttle, and all four motor values logged every control cycle for debugging and tuning.</div>
-    </div>
-    <div class="feat-card">
-      <div class="feat-num">09 / LOOP</div>
-      <div class="feat-icon-wrap"><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg></div>
-      <div class="feat-title">Real-Time Loop</div>
-      <div class="feat-desc">Deterministic 50 Hz control loop using micros()-based timing. Sensor read, PID compute, motor write — all sequenced within the 20 ms window at 16 MHz.</div>
-    </div>
+  <div class="feat-grid">
+    <div class="feat-card reveal"><div class="feat-accent gold"></div><div class="feat-n">01 / IMU</div><div class="feat-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/></svg></div><div class="feat-t">IMU Sensor Fusion</div><div class="feat-d">MPU-6050 gyroscope and accelerometer fused via complementary filter. Real-time roll and pitch at 50 Hz over I2C at address 0x68.</div></div>
+    <div class="feat-card reveal"><div class="feat-accent teal"></div><div class="feat-n">02 / PID</div><div class="feat-icon"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div><div class="feat-t">PID Stabiliser</div><div class="feat-d">Dual-axis PID with configurable Kp, Ki, Kd. Anti-windup integrator clamping. 20 ms control period at 50 Hz authority.</div></div>
+    <div class="feat-card reveal"><div class="feat-accent gold"></div><div class="feat-n">03 / ESC</div><div class="feat-icon"><svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div><div class="feat-t">Motor Mixing</div><div class="feat-d">X-frame quadcopter mixing on D9, D10, D11, D6. PWM 1000–2000 µs via Servo library. Alternated spin directions for yaw authority.</div></div>
+    <div class="feat-card reveal"><div class="feat-accent teal"></div><div class="feat-n">04 / ALT</div><div class="feat-icon"><svg viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div><div class="feat-t">Altitude Sensing</div><div class="feat-d">HC-SR04 ultrasonic on D2/D3. Median-filtered distance in metres. 4 m range with ±3 mm accuracy.</div></div>
+    <div class="feat-card reveal"><div class="feat-accent gold"></div><div class="feat-n">05 / LCD</div><div class="feat-icon"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div><div class="feat-t">I2C LCD Display</div><div class="feat-d">LiquidCrystal_I2C 16×2 at 0x27. Shows ARM state, altitude, roll, pitch, and throttle. Refreshes at 200 ms.</div></div>
+    <div class="feat-card reveal"><div class="feat-accent teal"></div><div class="feat-n">06 / SAFETY</div><div class="feat-icon"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div><div class="feat-t">ARM / DISARM</div><div class="feat-d">Push-button on D4 with 50 ms debounce. Hard motor lock when disarmed. PID integrators zero on arm. LED on D13 mirrors arm state.</div></div>
+    <div class="feat-card reveal"><div class="feat-accent gold"></div><div class="feat-n">07 / THR</div><div class="feat-icon"><svg viewBox="0 0 24 24"><line x1="12" y1="2" x2="12" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div><div class="feat-t">Throttle Control</div><div class="feat-d">10 kΩ potentiometer on A0 maps 0–5V to 1000–2000 µs PWM. Deadband at low throttle. Capped during PID saturation.</div></div>
+    <div class="feat-card reveal"><div class="feat-accent teal"></div><div class="feat-n">08 / SER</div><div class="feat-icon"><svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg></div><div class="feat-t">Serial Telemetry</div><div class="feat-d">Full stream at 9600 baud via USB. Roll, pitch, altitude, throttle, and four motor values every control cycle.</div></div>
+    <div class="feat-card reveal"><div class="feat-accent gold"></div><div class="feat-n">09 / LOOP</div><div class="feat-icon"><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg></div><div class="feat-t">Real-Time Loop</div><div class="feat-d">Deterministic 50 Hz via micros() timing. Sensor read → PID compute → motor write, all within 20 ms at 16 MHz.</div></div>
   </div>
 </section>
 
-<!-- PINOUT SECTION -->
-<section id="pinout" class="pinout-section fu d3">
-  <div class="pinout-inner">
-    <div>
-      <div class="section-tag" style="margin-bottom:20px;">
-        <span class="section-tag-line"></span>
-        <span class="section-tag-text">Hardware Pinout</span>
-      </div>
-      <h2 class="pinout-h2">Arduino Uno<br/><em>Pin Mapping</em></h2>
-      <p class="pinout-desc">Every pin assignment used in the drone controller — from ESC PWM outputs to I2C sensor bus and safety inputs.</p>
+<!-- PINOUT -->
+<section id="pinout" class="pinout-section">
+  <div class="section-label reveal">
+    <span class="section-label-line"></span>
+    <span class="section-label-text">Hardware Pinout</span>
+  </div>
+  <h2 class="section-h2 reveal">PIN<br/><em>MAPPING</em></h2>
+  <div class="pinout-grid">
+    <div class="reveal">
       <table class="pin-table">
         <thead>
-          <tr>
-            <th>Pin</th><th>Signal</th><th>Device</th><th>Type</th>
-          </tr>
+          <tr><th>Pin</th><th>Signal</th><th>Device</th><th>Type</th></tr>
         </thead>
         <tbody>
-          <tr><td class="pin-num">D2</td><td class="pin-name">TRIG</td><td class="pin-use">HC-SR04 Trigger</td><td><span class="pin-badge digital">Digital</span></td></tr>
-          <tr><td class="pin-num">D3</td><td class="pin-name">ECHO</td><td class="pin-use">HC-SR04 Echo</td><td><span class="pin-badge digital">Digital</span></td></tr>
-          <tr><td class="pin-num">D4</td><td class="pin-name">ARM_BTN</td><td class="pin-use">ARM/DISARM button</td><td><span class="pin-badge digital">Digital</span></td></tr>
-          <tr><td class="pin-num">D6</td><td class="pin-name">ESC_RR</td><td class="pin-use">Rear-right motor</td><td><span class="pin-badge analog">PWM</span></td></tr>
-          <tr><td class="pin-num">D9</td><td class="pin-name">ESC_FL</td><td class="pin-use">Front-left motor</td><td><span class="pin-badge analog">PWM</span></td></tr>
-          <tr><td class="pin-num">D10</td><td class="pin-name">ESC_FR</td><td class="pin-use">Front-right motor</td><td><span class="pin-badge analog">PWM</span></td></tr>
-          <tr><td class="pin-num">D11</td><td class="pin-name">ESC_RL</td><td class="pin-use">Rear-left motor</td><td><span class="pin-badge analog">PWM</span></td></tr>
-          <tr><td class="pin-num">D13</td><td class="pin-name">LED</td><td class="pin-use">ARM state indicator</td><td><span class="pin-badge digital">Digital</span></td></tr>
-          <tr><td class="pin-num">A0</td><td class="pin-name">THROTTLE</td><td class="pin-use">10kΩ potentiometer</td><td><span class="pin-badge analog">Analog</span></td></tr>
-          <tr><td class="pin-num">A4</td><td class="pin-name">SDA</td><td class="pin-use">MPU-6050 / LCD</td><td><span class="pin-badge i2c">I²C</span></td></tr>
-          <tr><td class="pin-num">A5</td><td class="pin-name">SCL</td><td class="pin-use">MPU-6050 / LCD</td><td><span class="pin-badge i2c">I²C</span></td></tr>
-          <tr><td class="pin-num">5V</td><td class="pin-name">VCC</td><td class="pin-use">Sensor power rail</td><td><span class="pin-badge power">Power</span></td></tr>
-          <tr><td class="pin-num">GND</td><td class="pin-name">GND</td><td class="pin-use">Common ground</td><td><span class="pin-badge power">Power</span></td></tr>
+          <tr><td class="pin-n">D2</td><td class="pin-sig">TRIG</td><td class="pin-dev">HC-SR04 Trigger</td><td><span class="pin-badge badge-d">Digital</span></td></tr>
+          <tr><td class="pin-n">D3</td><td class="pin-sig">ECHO</td><td class="pin-dev">HC-SR04 Echo</td><td><span class="pin-badge badge-d">Digital</span></td></tr>
+          <tr><td class="pin-n">D4</td><td class="pin-sig">ARM_BTN</td><td class="pin-dev">ARM/DISARM btn</td><td><span class="pin-badge badge-d">Digital</span></td></tr>
+          <tr><td class="pin-n">D6</td><td class="pin-sig">ESC_RR</td><td class="pin-dev">Rear-right motor</td><td><span class="pin-badge badge-a">PWM</span></td></tr>
+          <tr><td class="pin-n">D9</td><td class="pin-sig">ESC_FL</td><td class="pin-dev">Front-left motor</td><td><span class="pin-badge badge-a">PWM</span></td></tr>
+          <tr><td class="pin-n">D10</td><td class="pin-sig">ESC_FR</td><td class="pin-dev">Front-right motor</td><td><span class="pin-badge badge-a">PWM</span></td></tr>
+          <tr><td class="pin-n">D11</td><td class="pin-sig">ESC_RL</td><td class="pin-dev">Rear-left motor</td><td><span class="pin-badge badge-a">PWM</span></td></tr>
+          <tr><td class="pin-n">D13</td><td class="pin-sig">LED</td><td class="pin-dev">ARM indicator</td><td><span class="pin-badge badge-d">Digital</span></td></tr>
+          <tr><td class="pin-n">A0</td><td class="pin-sig">THROTTLE</td><td class="pin-dev">10kΩ pot</td><td><span class="pin-badge badge-a">Analog</span></td></tr>
+          <tr><td class="pin-n">A4</td><td class="pin-sig">SDA</td><td class="pin-dev">MPU-6050 / LCD</td><td><span class="pin-badge badge-i">I²C</span></td></tr>
+          <tr><td class="pin-n">A5</td><td class="pin-sig">SCL</td><td class="pin-dev">MPU-6050 / LCD</td><td><span class="pin-badge badge-i">I²C</span></td></tr>
+          <tr><td class="pin-n">5V</td><td class="pin-sig">VCC</td><td class="pin-dev">Sensor rail</td><td><span class="pin-badge badge-p">Power</span></td></tr>
+          <tr><td class="pin-n">GND</td><td class="pin-sig">GND</td><td class="pin-dev">Common ground</td><td><span class="pin-badge badge-p">Power</span></td></tr>
         </tbody>
       </table>
     </div>
-    <div>
-      <div class="section-tag" style="margin-bottom:20px;">
-        <span class="section-tag-line"></span>
-        <span class="section-tag-text">Libraries Used</span>
+    <div class="reveal">
+      <div class="section-label" style="margin-bottom:16px;">
+        <span class="section-label-line"></span>
+        <span class="section-label-text">Libraries</span>
       </div>
-      <h2 class="pinout-h2" style="font-size:clamp(24px,2.8vw,36px);">Arduino<br/><em>Dependencies</em></h2>
-      <p class="pinout-desc">All libraries available in the Arduino IDE library manager and pre-loaded in the Wokwi simulation.</p>
-      <div class="spec-table">
-        <div class="spec-row"><div class="spec-key">Wire.h</div><div class="spec-val teal">I2C communication</div></div>
-        <div class="spec-row"><div class="spec-key">Servo.h</div><div class="spec-val gold">ESC PWM signals</div></div>
-        <div class="spec-row"><div class="spec-key">LiquidCrystal_I2C</div><div class="spec-val">16×2 LCD driver</div></div>
-        <div class="spec-row"><div class="spec-key">MPU6050.h</div><div class="spec-val teal">Gyro / accel driver</div></div>
-        <div class="spec-row"><div class="spec-key">math.h</div><div class="spec-val">atan2, sqrt, PI</div></div>
+      <table class="lib-table">
+        <tr><td class="lib-name">Wire.h</td><td class="lib-desc">I2C communication</td></tr>
+        <tr><td class="lib-name">Servo.h</td><td class="lib-desc">ESC PWM signals</td></tr>
+        <tr><td class="lib-name">LiquidCrystal_I2C</td><td class="lib-desc">16×2 LCD driver</td></tr>
+        <tr><td class="lib-name">MPU6050.h</td><td class="lib-desc">Gyro / accel driver</td></tr>
+        <tr><td class="lib-name">math.h</td><td class="lib-desc">atan2, sqrt, PI</td></tr>
+      </table>
+      <div class="section-label" style="margin-bottom:16px;">
+        <span class="section-label-line"></span>
+        <span class="section-label-text">Default PID Values</span>
       </div>
-      <br/>
-      <div class="section-tag" style="margin-bottom:16px;">
-        <span class="section-tag-line"></span>
-        <span class="section-tag-text">PID Tuning Values</span>
-      </div>
-      <div class="spec-table">
-        <div class="spec-row"><div class="spec-key">Kp (Roll)</div><div class="spec-val gold">1.80</div></div>
-        <div class="spec-row"><div class="spec-key">Ki (Roll)</div><div class="spec-val">0.05</div></div>
-        <div class="spec-row"><div class="spec-key">Kd (Roll)</div><div class="spec-val">0.35</div></div>
-        <div class="spec-row"><div class="spec-key">Kp (Pitch)</div><div class="spec-val gold">1.80</div></div>
-        <div class="spec-row"><div class="spec-key">Ki (Pitch)</div><div class="spec-val">0.05</div></div>
-        <div class="spec-row"><div class="spec-key">Kd (Pitch)</div><div class="spec-val">0.35</div></div>
-        <div class="spec-row"><div class="spec-key">Output clamp</div><div class="spec-val teal">±400 µs</div></div>
+      <div class="pid-vals-grid">
+        <div class="pid-val-cell"><div class="pid-val-k">Kp Roll</div><div class="pid-val-v hl">1.80</div></div>
+        <div class="pid-val-cell"><div class="pid-val-k">Ki Roll</div><div class="pid-val-v">0.05</div></div>
+        <div class="pid-val-cell"><div class="pid-val-k">Kd Roll</div><div class="pid-val-v">0.35</div></div>
+        <div class="pid-val-cell"><div class="pid-val-k">Kp Pitch</div><div class="pid-val-v hl">1.80</div></div>
+        <div class="pid-val-cell"><div class="pid-val-k">Ki Pitch</div><div class="pid-val-v">0.05</div></div>
+        <div class="pid-val-cell"><div class="pid-val-k">Kd Pitch</div><div class="pid-val-v">0.35</div></div>
+        <div class="pid-val-cell" style="grid-column:span 2;"><div class="pid-val-k">Output Clamp</div><div class="pid-val-v hl">±400 µs</div></div>
       </div>
     </div>
   </div>
@@ -815,340 +1177,523 @@ footer{
 
 <!-- FOOTER -->
 <footer>
-  <div class="footer-gold-line"></div>
-  <div class="footer-top">
+  <div class="footer-inner">
     <div>
-      <div class="footer-brand-name">Joyal Varghese</div>
-      <div class="footer-brand-sub">Arduino · Drone Sim · Engineering</div>
+      <div class="footer-brand">Joyal Varghese</div>
+      <div class="footer-sub">Arduino · Drone Sim · Engineering Portfolio 2025</div>
     </div>
-    <div class="footer-col">
-      <div class="footer-col-title">Project</div>
-      <p>Repository: JOYALVARGHESE07/Robotics</p>
-      <p>Simulation: Wokwi · Arduino Uno</p>
-      <p>Language: C++ / Arduino IDE</p>
-    </div>
-    <div class="footer-col">
-      <div class="footer-col-title">Hardware</div>
-      <p>MCU: ATmega328P @ 16 MHz</p>
-      <p>IMU: MPU-6050 (I2C)</p>
-      <p>ALT: HC-SR04 Ultrasonic</p>
+    <div class="footer-links">
+      <span style="color:var(--text-2);">MCU: ATmega328P</span>
+      <span style="color:var(--text-2);">IMU: MPU-6050</span>
+      <span style="color:var(--text-2);">SIM: Wokwi</span>
     </div>
   </div>
   <div class="footer-bottom">
-    <p>© 2025 Joyal Varghese · Engineering Portfolio</p>
-    <p>wokwi.com/projects/460318666113414145</p>
+    <span class="footer-copy">© 2025 Joyal Varghese · Engineering Portfolio</span>
+    <span class="footer-url">wokwi.com/projects/460318666113414145</span>
   </div>
 </footer>
 
 <script>
-/* ════ DRONE CANVAS ════ */
+/* ─── CURSOR ─── */
+const cursor=document.getElementById('cursor');
+const ring=document.getElementById('cursor-ring');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{
+  mx=e.clientX;my=e.clientY;
+  cursor.style.left=mx+'px';cursor.style.top=my+'px';
+});
+function animateRing(){
+  rx+=(mx-rx)*0.12;ry+=(my-ry)*0.12;
+  ring.style.left=rx+'px';ring.style.top=ry+'px';
+  requestAnimationFrame(animateRing);
+}
+animateRing();
+document.querySelectorAll('a,button,input').forEach(el=>{
+  el.addEventListener('mouseenter',()=>ring.classList.add('hovering'));
+  el.addEventListener('mouseleave',()=>ring.classList.remove('hovering'));
+});
+
+/* ─── PARTICLES ─── */
 (function(){
-  const cv = document.getElementById('drone-canvas');
-  const ctx = cv.getContext('2d');
-  const S = 500;
-  cv.width = S; cv.height = S;
-  const cx = S/2, cy = S/2;
+  const cv=document.getElementById('particle-bg');
+  const ctx=cv.getContext('2d');
+  let W,H,pts;
+  function resize(){W=cv.width=window.innerWidth;H=cv.height=window.innerHeight;}
+  resize();window.addEventListener('resize',resize);
+  function mkPts(){
+    pts=[];
+    const n=Math.floor(W*H/28000);
+    for(let i=0;i<n;i++){
+      pts.push({
+        x:Math.random()*W,y:Math.random()*H,
+        vx:(Math.random()-.5)*.18,vy:(Math.random()-.5)*.18,
+        r:Math.random()*1.2+.3,
+        a:Math.random()*0.4+0.05
+      });
+    }
+  }
+  mkPts();
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    pts.forEach(p=>{
+      p.x+=p.vx;p.y+=p.vy;
+      if(p.x<0)p.x=W;if(p.x>W)p.x=0;
+      if(p.y<0)p.y=H;if(p.y>H)p.y=0;
+      ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx.fillStyle=`rgba(212,168,67,${p.a})`;ctx.fill();
+    });
+    // Connections
+    for(let i=0;i<pts.length;i++){
+      for(let j=i+1;j<pts.length;j++){
+        const dx=pts[i].x-pts[j].x,dy=pts[i].y-pts[j].y;
+        const d=Math.sqrt(dx*dx+dy*dy);
+        if(d<120){
+          ctx.beginPath();ctx.moveTo(pts[i].x,pts[i].y);ctx.lineTo(pts[j].x,pts[j].y);
+          ctx.strokeStyle=`rgba(212,168,67,${0.08*(1-d/120)})`;
+          ctx.lineWidth=0.5;ctx.stroke();
+        }
+      }
+    }
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
 
-  let t=0, mx=cx, my=cy, tx=cx, ty=cy;
-  let dx=cx, dy=cy, vx=0, vy=0;
+/* ─── DRONE CANVAS ─── */
+(function(){
+  const cv=document.getElementById('drone-canvas');
+  const ctx=cv.getContext('2d');
+  const S=520,CX=S/2,CY=S/2;
+  cv.width=S;cv.height=S;
+  let t=0,dmx=CX,dmy=CY,dvx=0,dvy=0,dtx=CX,dty=CY;
 
-  cv.addEventListener('mousemove', e=>{
-    const r=cv.getBoundingClientRect(), sc=S/r.width;
-    mx=(e.clientX-r.left)*sc; my=(e.clientY-r.top)*sc;
-    tx=mx; ty=my;
+  cv.addEventListener('mousemove',e=>{
+    const r=cv.getBoundingClientRect(),sc=S/r.width;
+    dtx=(e.clientX-r.left)*sc;dty=(e.clientY-r.top)*sc;
   });
-  cv.addEventListener('mouseleave',()=>{ tx=cx; ty=cy; });
-  cv.addEventListener('touchmove', e=>{
+  cv.addEventListener('mouseleave',()=>{dtx=CX;dty=CY;});
+  cv.addEventListener('touchmove',e=>{
     e.preventDefault();
-    const r=cv.getBoundingClientRect(), sc=S/r.width;
-    const t0=e.touches[0];
-    mx=(t0.clientX-r.left)*sc; my=(t0.clientY-r.top)*sc;
-    tx=mx; ty=my;
+    const r=cv.getBoundingClientRect(),sc=S/r.width;
+    dtx=(e.touches[0].clientX-r.left)*sc;
+    dty=(e.touches[0].clientY-r.top)*sc;
   },{passive:false});
 
-  function lerp(a,b,f){return a+(b-a)*f;}
+  let armed=true;
+  window.toggleArm=function(){
+    armed=!armed;
+    const btn=document.getElementById('arm-btn');
+    const lbl=document.getElementById('arm-label');
+    btn.className='pid-arm-btn '+(armed?'armed':'disarmed');
+    lbl.textContent=armed?'ARMED':'DISARMED';
+    document.getElementById('s-pid').textContent=armed?'ACTIVE':'IDLE';
+  };
 
-  function mkRotorGrad(x,y,r){
-    const g=ctx.createRadialGradient(x,y,0,x,y,r);
-    g.addColorStop(0,'rgba(200,200,210,0.25)');
-    g.addColorStop(.5,'rgba(168,168,184,0.15)');
-    g.addColorStop(1,'rgba(100,100,120,0)');
-    return g;
-  }
-
-  function drawRotor(x,y,radius,phase,dir){
-    // Glow halo
-    ctx.beginPath();
-    ctx.arc(x,y,radius+10,0,Math.PI*2);
-    ctx.fillStyle=mkRotorGrad(x,y,radius+10);
-    ctx.fill();
-
-    // Ring
-    ctx.beginPath();
-    ctx.arc(x,y,radius,0,Math.PI*2);
-    ctx.strokeStyle='rgba(201,168,76,0.18)';
-    ctx.lineWidth=1;ctx.stroke();
-
-    // Inner ring
-    ctx.beginPath();
-    ctx.arc(x,y,radius*0.55,0,Math.PI*2);
-    ctx.strokeStyle='rgba(168,168,184,0.12)';
-    ctx.lineWidth=0.5;ctx.stroke();
-
-    // Blades
-    const a = phase + dir*t*0.14;
-    for(let i=0;i<2;i++){
-      const ang = a + i*Math.PI;
-      ctx.save();
-      ctx.translate(x,y);ctx.rotate(ang);
-      const bg=ctx.createLinearGradient(-radius,0,radius,0);
-      bg.addColorStop(0,'rgba(100,100,120,0.6)');
-      bg.addColorStop(.35,'rgba(180,180,195,0.9)');
-      bg.addColorStop(.5,'rgba(220,215,200,0.95)');
-      bg.addColorStop(.65,'rgba(180,180,195,0.9)');
-      bg.addColorStop(1,'rgba(100,100,120,0.6)');
-      ctx.beginPath();
-      ctx.ellipse(0,0,radius,radius*.12,0,0,Math.PI*2);
-      ctx.fillStyle=bg;ctx.fill();
-      ctx.restore();
-    }
-
-    // Hub
-    const hg=ctx.createRadialGradient(x-1,y-1,0,x,y,7);
-    hg.addColorStop(0,'#e8e0c8');hg.addColorStop(.5,'#c9a84c');hg.addColorStop(1,'#8a6a28');
-    ctx.beginPath();ctx.arc(x,y,7,0,Math.PI*2);
+  function drawRotor(x,y,r,phase,dir){
+    // Blur ring
+    ctx.beginPath();ctx.arc(x,y,r+14,0,Math.PI*2);
+    const hg=ctx.createRadialGradient(x,y,0,x,y,r+14);
+    hg.addColorStop(0,'rgba(212,168,67,0.06)');
+    hg.addColorStop(1,'rgba(0,0,0,0)');
     ctx.fillStyle=hg;ctx.fill();
+    // Outer ring
+    ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);
+    ctx.strokeStyle='rgba(212,168,67,0.15)';ctx.lineWidth=0.8;ctx.stroke();
+    // Tick marks
+    for(let i=0;i<8;i++){
+      const a=i*Math.PI/4;
+      ctx.beginPath();
+      ctx.moveTo(x+Math.cos(a)*(r-5),y+Math.sin(a)*(r-5));
+      ctx.lineTo(x+Math.cos(a)*r,y+Math.sin(a)*r);
+      ctx.strokeStyle='rgba(212,168,67,0.25)';ctx.lineWidth=0.8;ctx.stroke();
+    }
+    // Blades
+    const speed=armed?1:0.1;
+    const ang=phase+dir*t*0.18*speed;
+    for(let b=0;b<2;b++){
+      const ba=ang+b*Math.PI;
+      ctx.save();ctx.translate(x,y);ctx.rotate(ba);
+      const bg=ctx.createLinearGradient(-r,0,r,0);
+      bg.addColorStop(0,'rgba(80,80,100,0.5)');
+      bg.addColorStop(0.3,'rgba(160,155,140,0.85)');
+      bg.addColorStop(0.5,'rgba(220,200,160,0.95)');
+      bg.addColorStop(0.7,'rgba(160,155,140,0.85)');
+      bg.addColorStop(1,'rgba(80,80,100,0.5)');
+      ctx.beginPath();ctx.ellipse(0,0,r,r*.1,0,0,Math.PI*2);
+      ctx.fillStyle=bg;ctx.fill();ctx.restore();
+    }
+    // Hub
+    const hb=ctx.createRadialGradient(x-1,y-1,0,x,y,7);
+    hb.addColorStop(0,'#f0d080');hb.addColorStop(.5,'#d4a843');hb.addColorStop(1,'#7a5a18');
+    ctx.beginPath();ctx.arc(x,y,7,0,Math.PI*2);ctx.fillStyle=hb;ctx.fill();
   }
 
   function drawArm(x1,y1,x2,y2){
     const g=ctx.createLinearGradient(x1,y1,x2,y2);
-    g.addColorStop(0,'rgba(100,100,115,.7)');
-    g.addColorStop(.5,'rgba(200,200,215,.95)');
-    g.addColorStop(1,'rgba(100,100,115,.7)');
+    g.addColorStop(0,'rgba(50,50,70,0.8)');
+    g.addColorStop(0.5,'rgba(140,130,110,0.95)');
+    g.addColorStop(1,'rgba(50,50,70,0.8)');
     ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);
-    ctx.strokeStyle=g;ctx.lineWidth=6;ctx.lineCap='round';ctx.stroke();
-    // Highlight
+    ctx.strokeStyle=g;ctx.lineWidth=7;ctx.lineCap='round';ctx.stroke();
+    // Carbon weave highlight
     ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);
-    ctx.strokeStyle='rgba(255,255,255,0.25)';ctx.lineWidth=1.5;ctx.stroke();
+    ctx.strokeStyle='rgba(255,255,255,0.12)';ctx.lineWidth=1;ctx.stroke();
   }
+
+  const AL=108;
+  const rotorDefs=[
+    {ox:-AL*0.707,oy:-AL*0.707,dir:1,ph:0},
+    {ox: AL*0.707,oy:-AL*0.707,dir:-1,ph:Math.PI/4},
+    {ox:-AL*0.707,oy: AL*0.707,dir:-1,ph:Math.PI/4},
+    {ox: AL*0.707,oy: AL*0.707,dir:1,ph:0},
+  ];
 
   function draw(){
     ctx.clearRect(0,0,S,S);
     t++;
+    const sp=0.04,dm=0.78;
+    dvx=(dvx+(dtx-dmx)*sp)*dm;
+    dvy=(dvy+(dty-dmy)*sp)*dm;
+    dmx+=dvx;dmy+=dvy;
 
-    const sp=0.045, dm=0.76;
-    vx=(vx+(tx-dx)*sp)*dm;
-    vy=(vy+(ty-dy)*sp)*dm;
-    dx+=vx; dy+=vy;
+    const hov=Math.sin(t*0.022)*9;
+    const px=dmx,py=dmy+hov;
+    const roll=(dmx-CX)*0.014;
+    const pitch=(dmy-CY)*0.011;
 
-    const hov=Math.sin(t*.022)*10;
-    const roll=(dx-cx)*.013;
-    const pitch=(dy-cy)*.010;
-    const px=dx, py=dy+hov;
-
-    const AL=100;
-    const rotors=[
-      {x:px-AL*Math.cos(Math.PI/4),y:py-AL*Math.sin(Math.PI/4),dir:1,ph:0},
-      {x:px+AL*Math.cos(Math.PI/4),y:py-AL*Math.sin(Math.PI/4),dir:-1,ph:Math.PI/4},
-      {x:px-AL*Math.cos(Math.PI/4),y:py+AL*Math.sin(Math.PI/4),dir:-1,ph:Math.PI/4},
-      {x:px+AL*Math.cos(Math.PI/4),y:py+AL*Math.sin(Math.PI/4),dir:1,ph:0},
-    ];
+    // Update HUD
+    document.getElementById('h-roll').textContent=(roll*57.3).toFixed(1)+'°';
+    document.getElementById('h-pitch').textContent=(pitch*57.3).toFixed(1)+'°';
+    const alt=(3.98+Math.sin(t*0.022)*0.08).toFixed(2);
+    document.getElementById('h-alt').textContent=alt+'m';
+    document.getElementById('s-roll').textContent=(roll*57.3).toFixed(1)+'°';
+    document.getElementById('s-pitch').textContent=(pitch*57.3).toFixed(1)+'°';
+    document.getElementById('s-alt').textContent=alt+'m';
 
     // Shadow
-    const sy=cy+195+Math.sin(t*.022)*8;
-    const sg=ctx.createRadialGradient(cx,sy,0,cx,sy,130);
-    sg.addColorStop(0,'rgba(201,168,76,0.12)');
-    sg.addColorStop(1,'rgba(0,0,0,0)');
-    ctx.beginPath();ctx.ellipse(cx,sy,130,14,0,0,Math.PI*2);
+    const sy=CY+190+Math.sin(t*0.022)*7;
+    const sg=ctx.createRadialGradient(CX,sy,0,CX,sy,120);
+    sg.addColorStop(0,'rgba(212,168,67,0.08)');sg.addColorStop(1,'transparent');
+    ctx.beginPath();ctx.ellipse(CX,sy,120,12,0,0,Math.PI*2);
     ctx.fillStyle=sg;ctx.fill();
 
-    // Diagonal cross lines (carbon fiber look)
-    rotors.forEach(r=>{
-      drawArm(px,py,r.x,r.y);
+    // Arms
+    rotorDefs.forEach(r=>{
+      drawArm(px,py,px+r.ox,py+r.oy);
     });
 
     // Body
     ctx.save();ctx.translate(px,py);
-    // Body outer
-    const bg1=ctx.createRadialGradient(-6,-6,0,0,0,32);
-    bg1.addColorStop(0,'#2a2a35');bg1.addColorStop(.5,'#1a1a22');bg1.addColorStop(1,'#0e0e14');
-    ctx.beginPath();
-    ctx.roundRect(-28,-14,56,28,8);
+    // Outer body
+    const bg1=ctx.createRadialGradient(-4,-4,0,0,0,36);
+    bg1.addColorStop(0,'#28283a');bg1.addColorStop(.5,'#1c1c28');bg1.addColorStop(1,'#0e0e18');
+    ctx.beginPath();ctx.roundRect(-30,-16,60,32,6);
     ctx.fillStyle=bg1;ctx.fill();
-    ctx.strokeStyle='rgba(201,168,76,0.4)';ctx.lineWidth=1;ctx.stroke();
+    ctx.strokeStyle='rgba(212,168,67,0.35)';ctx.lineWidth=0.8;ctx.stroke();
 
-    // Body top highlight
-    ctx.beginPath();ctx.roundRect(-22,-10,44,8,4);
-    ctx.fillStyle='rgba(255,255,255,0.06)';ctx.fill();
+    // Inner recess
+    ctx.beginPath();ctx.roundRect(-22,-10,44,10,4);
+    ctx.fillStyle='rgba(0,0,0,0.4)';ctx.fill();
 
     // Gold stripe
-    ctx.beginPath();ctx.roundRect(-28,-2,56,4,0);
-    const stripe=ctx.createLinearGradient(-28,0,28,0);
-    stripe.addColorStop(0,'rgba(201,168,76,0)');
-    stripe.addColorStop(.3,'rgba(201,168,76,0.6)');
-    stripe.addColorStop(.7,'rgba(201,168,76,0.6)');
-    stripe.addColorStop(1,'rgba(201,168,76,0)');
-    ctx.fillStyle=stripe;ctx.fill();
+    ctx.beginPath();ctx.rect(-30,-1,60,2);
+    const sg2=ctx.createLinearGradient(-30,0,30,0);
+    sg2.addColorStop(0,'rgba(212,168,67,0)');
+    sg2.addColorStop(0.25,'rgba(212,168,67,0.7)');
+    sg2.addColorStop(0.75,'rgba(212,168,67,0.7)');
+    sg2.addColorStop(1,'rgba(212,168,67,0)');
+    ctx.fillStyle=sg2;ctx.fill();
 
-    // Arduino "UNO" text
-    ctx.font='bold 7px "Courier Prime",monospace';
-    ctx.fillStyle='rgba(0,151,157,0.7)';
+    // UNO text
+    ctx.font='bold 6px "JetBrains Mono",monospace';
+    ctx.fillStyle='rgba(0,196,208,0.75)';
     ctx.textAlign='center';ctx.textBaseline='middle';
-    ctx.fillText('UNO',0,0);
+    ctx.fillText('UNO',0,4);
 
-    // LED
-    const ledOn=(t%60)<45;
-    ctx.beginPath();ctx.arc(18,-6,3.5,0,Math.PI*2);
-    ctx.fillStyle=ledOn?'#00979d':'rgba(0,151,157,0.2)';ctx.fill();
-    if(ledOn){
-      ctx.beginPath();ctx.arc(18,-6,7,0,Math.PI*2);
-      ctx.fillStyle='rgba(0,151,157,0.15)';ctx.fill();
+    // Teal LED
+    const lp=Math.sin(t*0.04)*0.5+0.5;
+    ctx.beginPath();ctx.arc(20,-7,3,0,Math.PI*2);
+    ctx.fillStyle=`rgba(0,196,208,${armed?0.85:0.2})`;ctx.fill();
+    if(armed){
+      ctx.beginPath();ctx.arc(20,-7,7,0,Math.PI*2);
+      ctx.fillStyle=`rgba(0,196,208,${0.08+lp*0.1})`;ctx.fill();
     }
-
-    // ARM LED
-    ctx.beginPath();ctx.arc(-18,-6,3.5,0,Math.PI*2);
-    const armPulse=0.5+0.5*Math.sin(t*.08);
-    ctx.fillStyle=`rgba(201,168,76,${0.4+armPulse*0.6})`;ctx.fill();
+    // Gold LED (ARM)
+    const ap=0.4+0.6*Math.sin(t*0.09);
+    ctx.beginPath();ctx.arc(-20,-7,3,0,Math.PI*2);
+    ctx.fillStyle=`rgba(212,168,67,${armed?ap:0.15})`;ctx.fill();
+    if(armed){
+      ctx.beginPath();ctx.arc(-20,-7,7,0,Math.PI*2);
+      ctx.fillStyle=`rgba(212,168,67,${0.05+ap*0.1})`;ctx.fill();
+    }
 
     ctx.restore();
 
-    rotors.forEach((r,i)=>drawRotor(r.x,r.y,42,r.ph,r.dir));
+    // Rotors
+    rotorDefs.forEach(r=>drawRotor(px+r.ox,py+r.oy,44,r.ph,r.dir));
 
     // Motion trail
-    for(let i=0;i<6;i++){
-      const al=(i/6)*0.06;
-      ctx.beginPath();ctx.arc(px-vx*(i*2),py-vy*(i*2),2-i*.25,0,Math.PI*2);
-      ctx.fillStyle=`rgba(201,168,76,${al})`;ctx.fill();
+    for(let i=1;i<=5;i++){
+      ctx.beginPath();ctx.arc(px-dvx*i*1.8,py-dvy*i*1.8,1.5-i*.2,0,Math.PI*2);
+      ctx.fillStyle=`rgba(212,168,67,${0.06-i*.01})`;ctx.fill();
     }
+
+    // HUD targeting lines
+    ctx.setLineDash([4,8]);
+    ctx.strokeStyle='rgba(212,168,67,0.06)';ctx.lineWidth=0.5;
+    ctx.beginPath();ctx.moveTo(px,0);ctx.lineTo(px,S);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(0,py);ctx.lineTo(S,py);ctx.stroke();
+    ctx.setLineDash([]);
 
     requestAnimationFrame(draw);
   }
   draw();
 })();
 
-/* ════ CHIP CANVAS ════ */
+/* ─── PID GRAPH ─── */
+let pidKp=1.80,pidKi=0.05,pidKd=0.35;
+let pidArmed=true;
+
+window.updatePID=function(){
+  pidKp=parseFloat(document.getElementById('kp').value);
+  pidKi=parseFloat(document.getElementById('ki').value);
+  pidKd=parseFloat(document.getElementById('kd').value);
+  document.getElementById('kp-val').textContent=pidKp.toFixed(2);
+  document.getElementById('ki-val').textContent=pidKi.toFixed(3);
+  document.getElementById('kd-val').textContent=pidKd.toFixed(2);
+  renderPIDGraph();
+};
+
+function simulatePID(kp,ki,kd,steps=160){
+  const setpoint=1.0,dt=0.02;
+  let err=0,integral=0,prev_err=0,output=0,pos=0;
+  const resp=[];
+  for(let i=0;i<steps;i++){
+    if(i<20){resp.push(0);continue;}
+    err=setpoint-pos;
+    integral=Math.max(-5,Math.min(5,integral+err*dt));
+    const deriv=(err-prev_err)/dt;
+    output=kp*err+ki*integral+kd*deriv;
+    output=Math.max(-2,Math.min(2,output));
+    pos+=output*dt*2.5;
+    prev_err=err;
+    resp.push(pos);
+  }
+  return resp;
+}
+
+function renderPIDGraph(){
+  const cv=document.getElementById('pid-graph');
+  const ctx=cv.getContext('2d');
+  const W=cv.offsetWidth,H=180;
+  cv.width=W;cv.height=H;
+  ctx.clearRect(0,0,W,H);
+
+  const resp=simulatePID(pidKp,pidKi,pidKd);
+  const setpoint=1.0;
+  const pad=24;
+
+  // Grid
+  ctx.strokeStyle='rgba(255,255,255,0.04)';ctx.lineWidth=0.5;
+  for(let g=0;g<=4;g++){
+    const y=pad+((H-pad*2)/4)*g;
+    ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();
+  }
+  // Setpoint line
+  const sp_y=H-pad-(setpoint/(1.6))*(H-pad*2);
+  ctx.setLineDash([6,6]);
+  ctx.strokeStyle='rgba(212,168,67,0.4)';ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(0,sp_y);ctx.lineTo(W,sp_y);ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Response curve
+  ctx.beginPath();
+  resp.forEach((v,i)=>{
+    const x=(i/(resp.length-1))*(W-pad)+pad/2;
+    const y=H-pad-(Math.min(1.6,Math.max(-0.2,v))/1.6)*(H-pad*2);
+    i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+  });
+  ctx.strokeStyle='rgba(0,196,208,0.85)';ctx.lineWidth=1.5;ctx.stroke();
+
+  // Fill under curve
+  ctx.beginPath();
+  resp.forEach((v,i)=>{
+    const x=(i/(resp.length-1))*(W-pad)+pad/2;
+    const y=H-pad-(Math.min(1.6,Math.max(-0.2,v))/1.6)*(H-pad*2);
+    i===0?ctx.moveTo(x,H-pad):ctx.lineTo(x,y);
+  });
+  ctx.lineTo(W-pad/2,H-pad);ctx.closePath();
+  const grad=ctx.createLinearGradient(0,pad,0,H);
+  grad.addColorStop(0,'rgba(0,196,208,0.15)');
+  grad.addColorStop(1,'rgba(0,196,208,0)');
+  ctx.fillStyle=grad;ctx.fill();
+
+  // Compute metrics
+  let riseIdx=-1,maxVal=0;
+  for(let i=20;i<resp.length;i++){
+    if(resp[i]>=0.9&&riseIdx<0)riseIdx=i;
+    if(resp[i]>maxVal)maxVal=resp[i];
+  }
+  const riseMs=riseIdx>0?((riseIdx-20)*20)+'ms':'—';
+  const over=maxVal>1?(((maxVal-1)*100).toFixed(1)+'%'):'0%';
+  const ssErr=Math.abs(resp[resp.length-1]-setpoint);
+  document.getElementById('r-rise').textContent=riseMs;
+  document.getElementById('r-over').textContent=over;
+  document.getElementById('r-ss').textContent=(ssErr*100).toFixed(1)+'%';
+}
+window.addEventListener('load',()=>{renderPIDGraph();});
+window.addEventListener('resize',renderPIDGraph);
+
+/* ─── THROTTLE ─── */
+let thrVal=62;
+window.updateThrottle=function(){
+  thrVal=parseInt(document.getElementById('thr').value);
+  document.getElementById('thr-val').textContent=thrVal+'%';
+  document.getElementById('s-thr').textContent=thrVal+'%';
+  const base=(thrVal/100)*55;
+  const noise=()=>Math.random()*6-3;
+  ['m-fl','m-fr','m-rl','m-rr'].forEach(id=>{
+    document.getElementById(id).style.height=Math.max(3,base+noise())+'px';
+  });
+};
+setInterval(()=>{
+  if(!pidArmed)return;
+  const base=(thrVal/100)*55;
+  const noise=()=>Math.random()*5-2.5;
+  ['m-fl','m-fr','m-rl','m-rr'].forEach(id=>{
+    document.getElementById(id).style.height=Math.max(3,base+noise())+'px';
+  });
+},120);
+
+/* ─── CHIP CANVAS ─── */
 (function(){
   const cv=document.getElementById('chip-canvas');
   if(!cv)return;
   const ctx=cv.getContext('2d');
-  const W=440,H=340;
+  const W=460,H=360;
   cv.width=W;cv.height=H;
   let t=0;
 
-  const GOLD='#c9a84c', TEAL='#00979d', SIL='#a8a8b8';
+  const GOLD='#d4a843',TEAL='#00c4d0',SIL='#a8a8c0',DIM='rgba(255,255,255,0.12)';
 
   function drawChip(){
     ctx.clearRect(0,0,W,H);
     t++;
+    const bx=70,by=30,bw=300,bh=290;
 
-    // Board background (dark green PCB)
-    const bx=80,by=40,bw=280,bh=260;
-    ctx.fillStyle='#0a1a0e';
-    ctx.strokeStyle=`rgba(0,151,157,0.3)`;
-    ctx.lineWidth=1.5;
-    ctx.beginPath();ctx.roundRect(bx,by,bw,bh,8);ctx.fill();ctx.stroke();
+    // PCB body
+    const pcb=ctx.createLinearGradient(bx,by,bx+bw,by+bh);
+    pcb.addColorStop(0,'#0a1810');pcb.addColorStop(1,'#071210');
+    ctx.beginPath();ctx.roundRect(bx,by,bw,bh,6);
+    ctx.fillStyle=pcb;ctx.fill();
+    ctx.strokeStyle='rgba(0,196,208,0.2)';ctx.lineWidth=1;ctx.stroke();
 
-    // PCB grid pattern
-    ctx.save();
-    ctx.beginPath();ctx.roundRect(bx,by,bw,bh,8);ctx.clip();
-    ctx.strokeStyle='rgba(0,80,40,0.4)';ctx.lineWidth=0.5;
-    for(let x=bx;x<bx+bw;x+=20){ctx.beginPath();ctx.moveTo(x,by);ctx.lineTo(x,by+bh);ctx.stroke();}
-    for(let y=by;y<by+bh;y+=20){ctx.beginPath();ctx.moveTo(bx,y);ctx.lineTo(bx+bw,y);ctx.stroke();}
+    // PCB grid
+    ctx.save();ctx.beginPath();ctx.roundRect(bx,by,bw,bh,6);ctx.clip();
+    ctx.strokeStyle='rgba(0,60,30,0.3)';ctx.lineWidth=0.4;
+    for(let x=bx;x<=bx+bw;x+=18){ctx.beginPath();ctx.moveTo(x,by);ctx.lineTo(x,by+bh);ctx.stroke();}
+    for(let y=by;y<=by+bh;y+=18){ctx.beginPath();ctx.moveTo(bx,y);ctx.lineTo(bx+bw,y);ctx.stroke();}
     ctx.restore();
 
-    // Arduino label
-    ctx.font='bold 18px "Courier Prime",monospace';
+    // Label
+    ctx.font='700 14px "JetBrains Mono",monospace';
     ctx.fillStyle=TEAL;ctx.textAlign='center';ctx.textBaseline='middle';
     ctx.fillText('ARDUINO',bx+bw/2,by+28);
-    ctx.font='bold 28px "Courier Prime",monospace';
-    ctx.fillStyle='rgba(255,255,255,0.85)';
-    ctx.fillText('UNO',bx+bw/2,by+56);
-    ctx.font='9px "Courier Prime",monospace';
-    ctx.fillStyle='rgba(0,151,157,0.5)';
-    ctx.fillText('ATmega328P · 16MHz · 32KB Flash',bx+bw/2,by+76);
+    ctx.font='800 30px Syne,sans-serif';
+    ctx.fillStyle='rgba(240,235,225,0.9)';
+    ctx.fillText('UNO',bx+bw/2,by+62);
+    ctx.font='300 8px "JetBrains Mono",monospace';
+    ctx.fillStyle='rgba(0,196,208,0.45)';
+    ctx.fillText('ATmega328P · 16MHz · 32KB',bx+bw/2,by+84);
 
-    // MCU chip
-    const mx=bx+90,my=by+100,mw=100,mh=80;
-    ctx.fillStyle='#1a1a22';ctx.strokeStyle=GOLD;ctx.lineWidth=1;
-    ctx.beginPath();ctx.roundRect(mx,my,mw,mh,4);ctx.fill();ctx.stroke();
-    ctx.font='8px "Courier Prime",monospace';ctx.fillStyle=SIL;ctx.textAlign='center';
-    ctx.fillText('ATmega',mx+mw/2,my+mh/2-6);
-    ctx.fillText('328P',mx+mw/2,my+mh/2+6);
+    // MCU die
+    const mx2=bx+90,my2=by+110,mw2=110,mh2=88;
+    const dieG=ctx.createLinearGradient(mx2,my2,mx2+mw2,my2+mh2);
+    dieG.addColorStop(0,'#1c1c28');dieG.addColorStop(1,'#141420');
+    ctx.beginPath();ctx.roundRect(mx2,my2,mw2,mh2,3);
+    ctx.fillStyle=dieG;ctx.fill();
+    ctx.strokeStyle='rgba(212,168,67,0.4)';ctx.lineWidth=0.8;ctx.stroke();
+    // Die label
+    ctx.font='500 9px "JetBrains Mono",monospace';ctx.fillStyle=SIL;ctx.textAlign='center';
+    ctx.fillText('ATmega',mx2+mw2/2,my2+mh2/2-7);
+    ctx.fillText('328P',mx2+mw2/2,my2+mh2/2+7);
 
-    // MCU pins animation
-    const pinPulse=0.5+0.5*Math.sin(t*.05);
-    for(let i=0;i<6;i++){
-      const py2=my+10+i*12;
-      ctx.fillStyle=`rgba(201,168,76,${0.3+pinPulse*.4})`;
-      ctx.fillRect(mx-12,py2,10,4);
-      ctx.fillRect(mx+mw+2,py2,10,4);
+    // Animated pins on die
+    const pp=0.5+0.5*Math.sin(t*0.05);
+    for(let i=0;i<7;i++){
+      const py3=my2+8+i*12;
+      ctx.fillStyle=`rgba(212,168,67,${0.25+pp*0.35})`;
+      ctx.fillRect(mx2-10,py3,8,3.5);
+      ctx.fillRect(mx2+mw2+2,py3,8,3.5);
     }
 
-    // USB port
-    ctx.fillStyle='#333340';ctx.strokeStyle='rgba(201,168,76,0.5)';ctx.lineWidth=1;
-    ctx.beginPath();ctx.roundRect(bx-2,by+100,16,30,3);ctx.fill();ctx.stroke();
-    ctx.font='7px "Courier Prime",monospace';ctx.fillStyle=GOLD;ctx.textAlign='center';
-    ctx.fillText('USB',bx+7,by+150);
+    // USB connector
+    ctx.fillStyle='#2a2a38';ctx.strokeStyle='rgba(212,168,67,0.4)';ctx.lineWidth=0.8;
+    ctx.beginPath();ctx.roundRect(bx-4,by+110,14,32,2);ctx.fill();ctx.stroke();
+    ctx.font='7px "JetBrains Mono",monospace';ctx.fillStyle=GOLD;ctx.textAlign='center';
+    ctx.fillText('USB',bx+3,by+156);
 
     // Power jack
-    ctx.beginPath();ctx.arc(bx+30,by+bh-20,12,0,Math.PI*2);
-    ctx.fillStyle='#222';ctx.fill();ctx.strokeStyle=SIL;ctx.lineWidth=1;ctx.stroke();
-    ctx.beginPath();ctx.arc(bx+30,by+bh-20,5,0,Math.PI*2);
-    ctx.fillStyle='#111';ctx.fill();
+    ctx.beginPath();ctx.arc(bx+32,by+bh-22,11,0,Math.PI*2);
+    ctx.fillStyle='#1a1a22';ctx.fill();
+    ctx.strokeStyle=SIL;ctx.lineWidth=0.8;ctx.stroke();
+    ctx.beginPath();ctx.arc(bx+32,by+bh-22,4.5,0,Math.PI*2);
+    ctx.fillStyle='#080810';ctx.fill();
 
-    // Pin headers — digital
-    ctx.font='7px "Courier Prime",monospace';
+    // Digital pin headers
     for(let i=0;i<14;i++){
-      const px2=bx+bw-16,py2=by+20+i*17;
-      const isActive=[6,9,10,11,13].includes(i);
-      const pulse=isActive?(0.5+0.5*Math.sin(t*.08+i)):0;
-      ctx.fillStyle=isActive?`rgba(201,168,76,${0.6+pulse*.4})`:'rgba(168,168,184,0.3)';
-      ctx.fillRect(px2,py2,14,8);
-      ctx.fillStyle=isActive?GOLD:'rgba(168,168,184,0.4)';
-      ctx.textAlign='right';ctx.fillText('D'+i,px2-3,py2+5);
+      const px3=bx+bw-13,py3=by+22+i*19;
+      const active=[6,9,10,11,13].includes(i);
+      const pulse=active?(0.5+0.5*Math.sin(t*0.08+i)):0;
+      ctx.fillStyle=active?`rgba(212,168,67,${0.55+pulse*0.45})`:'rgba(168,168,192,0.18)';
+      ctx.fillRect(px3,py3,12,7);
+      ctx.font='7px "JetBrains Mono",monospace';
+      ctx.fillStyle=active?GOLD:'rgba(168,168,192,0.4)';
+      ctx.textAlign='right';ctx.fillText('D'+i,px3-3,py3+5);
     }
 
-    // Pin headers — analog
+    // Analog pin headers
     for(let i=0;i<6;i++){
-      const px2=bx+12,py2=by+bh-30-i*18;
-      const isActive=[0,4,5].includes(i);
-      const pulse=isActive?(0.5+0.5*Math.sin(t*.07+i)):0;
-      ctx.fillStyle=isActive?`rgba(0,151,157,${0.6+pulse*.4})`:'rgba(168,168,184,0.3)';
-      ctx.fillRect(px2,py2,14,8);
-      ctx.fillStyle=isActive?TEAL:'rgba(168,168,184,0.4)';
-      ctx.textAlign='left';ctx.fillText('A'+i,px2+17,py2+5);
+      const px3=bx+10,py3=by+bh-28-i*20;
+      const active=[0,4,5].includes(i);
+      const pulse=active?(0.5+0.5*Math.sin(t*0.07+i)):0;
+      ctx.fillStyle=active?`rgba(0,196,208,${0.55+pulse*0.45})`:'rgba(168,168,192,0.18)';
+      ctx.fillRect(px3,py3,12,7);
+      ctx.font='7px "JetBrains Mono",monospace';
+      ctx.fillStyle=active?TEAL:'rgba(168,168,192,0.4)';
+      ctx.textAlign='left';ctx.fillText('A'+i,px3+15,py3+5);
     }
 
-    // LED indicators
+    // LEDs
     const leds=[
-      {x:bx+bw-30,y:by+bh-20,col:TEAL,label:'TX'},
-      {x:bx+bw-50,y:by+bh-20,col:GOLD,label:'RX'},
-      {x:bx+bw-70,y:by+bh-20,col:'#ff5050',label:'PWR'},
+      {x:bx+bw-28,y:by+bh-18,col:TEAL},
+      {x:bx+bw-48,y:by+bh-18,col:GOLD},
+      {x:bx+bw-68,y:by+bh-18,col:'#ff4d6d'},
     ];
-    leds.forEach(l=>{
-      const lp=0.5+0.5*Math.sin(t*.06);
-      ctx.beginPath();ctx.arc(l.x,l.y,5,0,Math.PI*2);
-      ctx.fillStyle=l.col;ctx.globalAlpha=0.5+lp*.5;ctx.fill();ctx.globalAlpha=1;
-      ctx.font='7px "Courier Prime",monospace';ctx.fillStyle=l.col;ctx.textAlign='center';
-      ctx.fillText(l.label,l.x,l.y+14);
+    const labels=['TX','RX','PWR'];
+    leds.forEach((l,i)=>{
+      const lp=0.5+0.5*Math.sin(t*0.06+i*1.2);
+      ctx.beginPath();ctx.arc(l.x,l.y,4.5,0,Math.PI*2);
+      ctx.fillStyle=l.col;ctx.globalAlpha=0.4+lp*0.6;ctx.fill();ctx.globalAlpha=1;
+      ctx.font='6px "JetBrains Mono",monospace';ctx.fillStyle=l.col;ctx.textAlign='center';
+      ctx.fillText(labels[i],l.x,l.y+13);
     });
 
-    // Traces (animated)
-    const tracePoints=[
-      {x:mx+mw,y:my+20,tx:bx+bw-16,ty:by+6*17+24,col:GOLD},
-      {x:mx+mw,y:my+32,tx:bx+bw-16,ty:by+9*17+24,col:GOLD},
-      {x:mx+mw,y:my+44,tx:bx+bw-16,ty:by+10*17+24,col:GOLD},
-      {x:mx,y:my+50,tx:bx+12+14,ty:by+bh-30-4*18+4,col:TEAL},
-      {x:mx,y:my+62,tx:bx+12+14,ty:by+bh-30-5*18+4,col:TEAL},
+    // Animated traces
+    const traces=[
+      {x1:mx2+mw2,y1:my2+18,tx:bx+bw-13,ty:by+6*19+25,col:GOLD},
+      {x1:mx2+mw2,y1:my2+30,tx:bx+bw-13,ty:by+9*19+25,col:GOLD},
+      {x1:mx2+mw2,y1:my2+42,tx:bx+bw-13,ty:by+10*19+25,col:GOLD},
+      {x1:mx2,y1:my2+52,tx:bx+10+12,ty:by+bh-28-4*20+3,col:TEAL},
+      {x1:mx2,y1:my2+64,tx:bx+10+12,ty:by+bh-28-5*20+3,col:TEAL},
     ];
-    tracePoints.forEach((tp,i)=>{
-      const prog=((t*1.5+i*40)%200)/200;
-      const dashLen=30;
-      ctx.setLineDash([dashLen,200-dashLen]);
-      ctx.lineDashOffset=-prog*200;
-      ctx.beginPath();ctx.moveTo(tp.x,tp.y);
-      ctx.lineTo(tp.x+20,tp.y);ctx.lineTo(tp.x+20,tp.ty);ctx.lineTo(tp.tx,tp.ty);
-      ctx.strokeStyle=tp.col;ctx.lineWidth=1;ctx.globalAlpha=0.5;ctx.stroke();
+    traces.forEach((tr,i)=>{
+      const prog=((t*1.2+i*35)%180)/180;
+      ctx.setLineDash([20,160]);ctx.lineDashOffset=-(prog*180);
+      ctx.beginPath();ctx.moveTo(tr.x1,tr.y1);
+      ctx.lineTo(tr.x1+18,tr.y1);ctx.lineTo(tr.x1+18,tr.ty);ctx.lineTo(tr.tx,tr.ty);
+      ctx.strokeStyle=tr.col;ctx.lineWidth=0.8;ctx.globalAlpha=0.45;ctx.stroke();
       ctx.globalAlpha=1;ctx.setLineDash([]);
     });
   }
@@ -1156,6 +1701,43 @@ footer{
   function loop(){drawChip();requestAnimationFrame(loop);}
   loop();
 })();
+
+/* ─── LIVE TERMINAL ─── */
+(function(){
+  const body=document.getElementById('term-body');
+  let loopN=0;
+  const motors=[1420,1418,1422,1416];
+  function tick(){
+    loopN++;
+    const roll=(Math.random()*2-1).toFixed(1);
+    const pitch=(Math.random()*2-1).toFixed(1);
+    const alt=(3.90+Math.random()*0.18).toFixed(2);
+    const thr=document.getElementById('thr')?.value||62;
+    motors.forEach((_,i)=>motors[i]=1400+Math.floor(Math.random()*50));
+    const line=document.createElement('span');
+    line.innerHTML=`<span class="tw">Roll: ${roll}°  Pitch: ${pitch}°  Alt: </span><span class="tg">${alt}m</span>  <span class="tgold">Thr: ${thr}%</span><br/><span class="td">FL:${motors[0]} FR:${motors[1]} RL:${motors[2]} RR:${motors[3]}</span><br/>`;
+    body.appendChild(line);
+    body.scrollTop=body.scrollHeight;
+    if(body.children.length>60){body.removeChild(body.firstChild);body.removeChild(body.firstChild);}
+  }
+  setInterval(tick,800);
+})();
+
+/* ─── SCROLL REVEAL ─── */
+const ro=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible');});
+},{threshold:0.12});
+document.querySelectorAll('.reveal').forEach(el=>ro.observe(el));
+
+/* ─── ARM TOGGLE (also updates PID) ─── */
+function toggleArm(){
+  pidArmed=!pidArmed;
+  const btn=document.getElementById('arm-btn');
+  const lbl=document.getElementById('arm-label');
+  btn.className='pid-arm-btn '+(pidArmed?'armed':'disarmed');
+  lbl.textContent=pidArmed?'ARMED':'DISARMED';
+  document.getElementById('s-pid').textContent=pidArmed?'ACTIVE':'IDLE';
+}
 </script>
 </body>
 </html>
