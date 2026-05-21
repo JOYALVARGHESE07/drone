@@ -1,961 +1,1484 @@
+cat > /home/claude/eco_house.html << 'HTMLEOF'
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Smart Eco-Friendly House — KS0576 Arduino Project</title>
-<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Smart Eco-Friendly House — KS0576 · Joyal Varghese</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400;1,500&family=Bebas+Neue&family=DM+Sans:wght@200;300;400;500&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet"/>
 <style>
-  :root {
-    --bg: #0d1117;
-    --surface: #161b22;
-    --border: #30363d;
-    --text: #e6edf3;Smart Eco-Friendly House Kit for Arduino (included) - Keyestudio KS0576
-    --muted: #8b949e;
-    --green: #3fb950;
-    --green-dim: #1f4e2b;
-    --amber: #d29922;
-    --amber-dim: #3d2f0a;
-    --blue: #58a6ff;
-    --blue-dim: #0d2a4a;
-    --red: #f85149;
-    --teal: #39d353;
-    --accent: #7ee787;
-  }
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+:root{
+  --black:#06100a;
+  --black2:#0b160e;
+  --black3:#101a12;
+  --silver-dark:#6b7870;
+  --silver:#a8b8b0;
+  --silver-light:#d4e0da;
+  --silver-bright:#ebf2ee;
+  --white:#f0f7f3;
+  --green:#3fb950;
+  --green-light:#7ee787;
+  --green-dim:#1a4a28;
+  --green-glow:rgba(63,185,80,0.14);
+  --green-border:rgba(63,185,80,0.28);
+  --amber:#c9a84c;
+  --amber-light:#e8c97a;
+  --amber-dim:#8a6a28;
+  --amber-glow:rgba(201,168,76,0.13);
+  --amber-border:rgba(201,168,76,0.28);
+  --teal:#00b4aa;
+  --teal-dim:rgba(0,180,170,0.12);
+}
 
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Syne', sans-serif;
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
+html{scroll-behavior:smooth}
+body{
+  background:var(--black);
+  color:var(--silver-light);
+  font-family:'DM Sans',sans-serif;
+  font-weight:300;
+  overflow-x:hidden;
+  cursor:none;
+}
 
-  /* Grid background */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image:
-      linear-gradient(rgba(63,185,80,0.04) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(63,185,80,0.04) 1px, transparent 1px);
-    background-size: 40px 40px;
-    pointer-events: none;
-    z-index: 0;
-  }
+#cursor{
+  position:fixed;width:12px;height:12px;border-radius:50%;
+  background:var(--green);pointer-events:none;z-index:99999;
+  transform:translate(-50%,-50%);
+  transition:width .2s,height .2s,background .2s;
+  mix-blend-mode:screen;
+}
+#cursor-ring{
+  position:fixed;width:36px;height:36px;border-radius:50%;
+  border:1px solid rgba(63,185,80,0.5);pointer-events:none;z-index:99998;
+  transform:translate(-50%,-50%);
+  transition:all .12s ease;
+}
 
-  .container { max-width: 960px; margin: 0 auto; padding: 0 24px; position: relative; z-index: 1; }
+body::before{
+  content:'';position:fixed;inset:0;z-index:9998;pointer-events:none;
+  opacity:.3;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)' opacity='0.04'/%3E%3C/svg%3E");
+}
 
-  /* ── TOP BAR ── */
-  .topbar {
-    border-bottom: 1px solid var(--border);
-    padding: 12px 0;
-    background: rgba(13,17,23,0.85);
-    backdrop-filter: blur(8px);
-    position: sticky;
-    top: 0;
-    z-index: 100;
-  }
-  .topbar .inner {
-    max-width: 960px;
-    margin: 0 auto;
-    padding: 0 24px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    font-family: 'Space Mono', monospace;
-    font-size: 13px;
-  }
-  .repo-path { color: var(--blue); }
-  .repo-path span { color: var(--muted); }
-  .badge {
-    margin-left: auto;
-    display: flex;
-    gap: 8px;
-  }
-  .badge-item {
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 2px 10px;
-    font-size: 11px;
-    color: var(--muted);
-    display: flex;
-    align-items: center;
-    gap: 5px;
-  }
-  .badge-item .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); }
+@keyframes fadeUp{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes scanLine{0%{transform:translateY(-100%)}100%{transform:translateY(100vh)}}
+@keyframes borderPulse{0%,100%{border-color:var(--green-border)}50%{border-color:rgba(63,185,80,.6)}}
+@keyframes leafSway{0%,100%{transform:rotate(-5deg)}50%{transform:rotate(5deg)}}
+@keyframes glowPulse{0%,100%{box-shadow:0 0 0 0 var(--green-glow)}50%{box-shadow:0 0 30px 8px var(--green-glow)}}
+@keyframes dataFlow{0%{stroke-dashoffset:300}100%{stroke-dashoffset:0}}
+@keyframes counterUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes particleDrift{
+  0%{transform:translate(0,0) scale(1);opacity:.8}
+  50%{transform:translate(var(--dx),var(--dy)) scale(1.4);opacity:.4}
+  100%{transform:translate(0,0) scale(1);opacity:.8}
+}
+@keyframes shimmer{
+  0%{background-position:200% center}
+  100%{background-position:-200% center}
+}
+@keyframes rotate360{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+@keyframes float{
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(-12px)}
+}
+@keyframes typewriter{
+  from{width:0}to{width:100%}
+}
+@keyframes blink{
+  0%,100%{opacity:1}50%{opacity:0}
+}
+@keyframes ripple{
+  0%{transform:scale(1);opacity:.6}
+  100%{transform:scale(2.5);opacity:0}
+}
 
-  /* ── HERO ── */
-  .hero {
-    padding: 64px 0 48px;
-    border-bottom: 1px solid var(--border);
-  }
-  .hero-tag {
-    font-family: 'Space Mono', monospace;
-    font-size: 11px;
-    color: var(--green);
-    text-transform: uppercase;
-    letter-spacing: 3px;
-    margin-bottom: 16px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .hero-tag::before { content: ''; width: 24px; height: 1px; background: var(--green); }
-  h1 {
-    font-size: clamp(32px, 5vw, 52px);
-    font-weight: 800;
-    line-height: 1.1;
-    letter-spacing: -1px;
-    margin-bottom: 16px;
-  }
-  h1 em {
-    font-style: normal;
-    color: var(--accent);
-  }
-  .hero-sub {
-    font-size: 16px;
-    color: var(--muted);
-    max-width: 560px;
-    line-height: 1.6;
-    margin-bottom: 32px;
-  }
-  .hero-badges {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-bottom: 40px;
-  }
-  .pill {
-    padding: 4px 14px;
-    border-radius: 20px;
-    font-family: 'Space Mono', monospace;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-  }
-  .pill-green { background: var(--green-dim); color: var(--green); border: 1px solid var(--green); }
-  .pill-amber { background: var(--amber-dim); color: var(--amber); border: 1px solid var(--amber); }
-  .pill-blue { background: var(--blue-dim); color: var(--blue); border: 1px solid var(--blue); }
+.fu{animation:fadeUp 1s cubic-bezier(.16,1,.3,1) forwards;opacity:0;}
+.d1{animation-delay:.05s}.d2{animation-delay:.15s}.d3{animation-delay:.25s}
+.d4{animation-delay:.35s}.d5{animation-delay:.5s}.d6{animation-delay:.65s}
+.d7{animation-delay:.8s}.d8{animation-delay:.95s}
 
-  .hero-image-box {
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    overflow: hidden;
-    background: var(--surface);
-    position: relative;
-    margin-top: 8px;
-  }
-  .hero-image-inner {
-    background: linear-gradient(135deg, #1a2b1a 0%, #0d1a1a 50%, #1a1a2b 100%);
-    padding: 40px;
-    min-height: 260px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .ascii-house {
-    font-family: 'Space Mono', monospace;
-    font-size: 13px;
-    line-height: 1.4;
-    color: var(--accent);
-    opacity: 0.85;
-    text-align: center;
-    animation: fadeIn 1s ease;
-  }
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 0.85; transform: translateY(0); } }
+.scanline{
+  position:fixed;top:0;left:0;right:0;height:4px;
+  background:linear-gradient(90deg,transparent,rgba(63,185,80,0.05),transparent);
+  animation:scanLine 10s linear infinite;
+  pointer-events:none;z-index:9997;
+}
 
-  .sensor-readout {
-    position: absolute;
-    top: 16px; right: 16px;
-    background: rgba(0,0,0,0.6);
-    border: 1px solid var(--green);
-    border-radius: 6px;
-    padding: 10px 14px;
-    font-family: 'Space Mono', monospace;
-    font-size: 11px;
-    color: var(--green);
-    line-height: 1.8;
-  }
+.particle{
+  position:fixed;border-radius:50%;pointer-events:none;z-index:1;
+  animation:particleDrift var(--dur) ease-in-out infinite;
+  animation-delay:var(--delay);
+  background:var(--green);opacity:0.2;
+}
 
-  /* ── SECTION TITLES ── */
-  .section { padding: 48px 0; border-bottom: 1px solid var(--border); }
-  .section-title {
-    font-family: 'Space Mono', monospace;
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 3px;
-    color: var(--muted);
-    margin-bottom: 24px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-  .section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
-  h2 { font-size: 24px; font-weight: 800; margin-bottom: 20px; letter-spacing: -0.5px; }
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:500;
+  height:64px;
+  background:rgba(6,16,10,0.9);
+  backdrop-filter:blur(28px) saturate(130%);
+  border-bottom:0.5px solid rgba(63,185,80,0.18);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 64px;
+  transition:border-color .4s;
+}
+nav:hover{border-bottom-color:rgba(63,185,80,0.4);}
+.nav-logo{display:flex;align-items:center;gap:14px;}
+.nav-logo-mark{
+  width:32px;height:32px;
+  border:1px solid var(--green-border);
+  display:flex;align-items:center;justify-content:center;
+  transition:all .3s;
+}
+.nav-logo-mark:hover{background:var(--green-glow);border-color:var(--green);}
+.nav-logo-mark svg{width:18px;height:18px;stroke:var(--green);fill:none;stroke-width:1.2;}
+.nav-name{
+  font-family:'Playfair Display',serif;
+  font-size:16px;font-weight:400;
+  color:var(--white);letter-spacing:.5px;
+}
+.nav-links{display:flex;gap:36px;list-style:none;}
+.nav-links a{
+  font-size:11px;letter-spacing:2px;text-transform:uppercase;
+  color:var(--silver-dark);text-decoration:none;
+  transition:color .25s;font-weight:400;
+  position:relative;
+}
+.nav-links a::after{
+  content:'';position:absolute;bottom:-4px;left:0;right:0;height:1px;
+  background:var(--green);transform:scaleX(0);transition:transform .3s;
+}
+.nav-links a:hover{color:var(--green);}
+.nav-links a:hover::after{transform:scaleX(1);}
+.nav-cta{
+  display:flex;align-items:center;gap:10px;
+  border:1px solid var(--green-border);
+  padding:9px 22px;
+  font-size:10px;letter-spacing:3px;text-transform:uppercase;
+  color:var(--green);font-weight:500;text-decoration:none;
+  transition:all .3s;
+}
+.nav-cta:hover{background:var(--green-glow);border-color:var(--green);transform:translateY(-1px);}
+.nav-cta svg{width:12px;height:12px;stroke:var(--green);fill:none;stroke-width:2;}
 
-  /* ── FEATURES GRID ── */
-  .features-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 16px;
-  }
-  .feature-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 20px;
-    transition: border-color 0.2s, transform 0.2s;
-  }
-  .feature-card:hover { border-color: var(--green); transform: translateY(-2px); }
-  .feature-icon { font-size: 28px; margin-bottom: 12px; }
-  .feature-card h3 { font-size: 14px; font-weight: 700; margin-bottom: 6px; }
-  .feature-card p { font-size: 13px; color: var(--muted); line-height: 1.5; }
+.hero{
+  min-height:100vh;
+  display:grid;grid-template-columns:1fr 1fr;
+  align-items:center;
+  padding:100px 64px 64px;
+  position:relative;overflow:hidden;
+  background:
+    radial-gradient(ellipse at 60% 40%,rgba(63,185,80,.05) 0%,transparent 55%),
+    radial-gradient(ellipse at 20% 80%,rgba(0,180,170,.04) 0%,transparent 50%),
+    radial-gradient(ellipse at 90% 90%,rgba(201,168,76,.03) 0%,transparent 40%);
+}
+.hero::before{
+  content:'';position:absolute;inset:0;
+  background-image:
+    linear-gradient(rgba(63,185,80,.05) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(63,185,80,.05) 1px,transparent 1px);
+  background-size:80px 80px;
+  mask-image:radial-gradient(ellipse at center,black 20%,transparent 75%);
+}
 
-  /* ── COMPONENTS TABLE ── */
-  .components-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 12px;
-  }
-  .component-row {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 14px 16px;
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    transition: border-color 0.15s;
-    animation: slideIn 0.4s ease both;
-  }
-  .component-row:hover { border-color: var(--green); }
-  @keyframes slideIn { from { opacity: 0; transform: translateX(-8px); } to { opacity: 1; transform: translateX(0); } }
+.hero-left{position:relative;z-index:2;}
+.hero-overline{
+  display:inline-flex;align-items:center;gap:12px;
+  margin-bottom:28px;
+}
+.hero-overline-line{width:40px;height:1px;background:var(--green);}
+.hero-overline-text{
+  font-size:10px;letter-spacing:4px;text-transform:uppercase;
+  color:var(--green);font-weight:500;
+}
+.hero-h1{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(68px,9vw,128px);
+  line-height:.92;letter-spacing:2px;
+  color:var(--white);
+  margin-bottom:4px;
+}
+.hero-h1 .green-line{
+  display:block;
+  background:linear-gradient(90deg,var(--green-light),var(--green),var(--green-dim));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.hero-sub{
+  font-family:'Playfair Display',serif;
+  font-size:clamp(16px,2vw,22px);
+  font-style:italic;font-weight:400;
+  color:var(--silver);
+  margin-bottom:36px;margin-top:8px;
+}
+.hero-desc{
+  font-size:15px;line-height:1.85;color:var(--silver-dark);
+  max-width:440px;font-weight:300;margin-bottom:48px;
+}
+.hero-desc span{color:var(--green);}
+.hero-desc span.amber{color:var(--amber);}
 
-  .comp-num {
-    font-family: 'Space Mono', monospace;
-    font-size: 11px;
-    color: var(--muted);
-    width: 24px;
-    flex-shrink: 0;
-  }
-  .comp-icon { font-size: 22px; flex-shrink: 0; }
-  .comp-info { flex: 1; }
-  .comp-name { font-size: 14px; font-weight: 600; line-height: 1.3; }
-  .comp-desc { font-size: 11px; color: var(--muted); margin-top: 2px; font-family: 'Space Mono', monospace; }
-  .comp-qty {
-    font-family: 'Space Mono', monospace;
-    font-size: 12px;
-    color: var(--accent);
-    background: var(--green-dim);
-    border: 1px solid #2d5a35;
-    border-radius: 4px;
-    padding: 2px 8px;
-    flex-shrink: 0;
-  }
+.team-badge{
+  display:inline-flex;align-items:center;gap:10px;
+  background:rgba(63,185,80,0.07);
+  border:1px solid var(--green-border);
+  padding:10px 18px;
+  margin-bottom:28px;
+  font-size:11px;letter-spacing:1.5px;
+  color:var(--silver);
+  font-weight:300;
+  line-height:1.8;
+}
+.team-badge svg{width:14px;height:14px;stroke:var(--green);fill:none;stroke-width:1.5;flex-shrink:0;}
+.team-badge strong{color:var(--green-light);font-weight:700;letter-spacing:.5px;}
 
-  /* ── PROJECTS ── */
-  .projects-list { display: flex; flex-direction: column; gap: 12px; }
-  .project-item {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 16px 20px;
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    transition: border-color 0.15s;
-  }
-  .project-item:hover { border-color: var(--blue); }
-  .project-num {
-    font-family: 'Space Mono', monospace;
-    font-size: 20px;
-    font-weight: 700;
-    color: var(--green);
-    width: 40px;
-    flex-shrink: 0;
-  }
-  .project-info { flex: 1; }
-  .project-info h4 { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
-  .project-info p { font-size: 13px; color: var(--muted); }
-  .project-tag { font-family: 'Space Mono', monospace; font-size: 11px; color: var(--blue); }
+.btn-green{
+  display:inline-flex;align-items:center;gap:12px;
+  background:linear-gradient(135deg,var(--green-dim),var(--green),var(--green-dim));
+  background-size:200% 100%;
+  color:var(--black);
+  padding:15px 32px;
+  font-size:10px;letter-spacing:4px;text-transform:uppercase;font-weight:600;
+  text-decoration:none;
+  transition:background-position .4s,transform .2s;
+}
+.btn-green:hover{background-position:100% 0;transform:translateY(-2px);}
+.btn-green svg{width:14px;height:14px;stroke:var(--black);fill:none;stroke-width:2.5;}
+.btn-outline{
+  display:inline-flex;align-items:center;gap:12px;
+  border:1px solid rgba(168,184,176,.3);
+  padding:15px 32px;
+  font-size:10px;letter-spacing:4px;text-transform:uppercase;font-weight:500;
+  color:var(--silver);text-decoration:none;
+  transition:all .25s;margin-left:16px;
+}
+.btn-outline:hover{border-color:var(--silver);color:var(--white);transform:translateY(-2px);}
 
-  /* ── PINOUT ── */
-  .pinout-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 10px;
-  }
-  .pin-row {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 10px 14px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-family: 'Space Mono', monospace;
-    font-size: 12px;
-  }
-  .pin-name { color: var(--text); }
-  .pin-val { color: var(--amber); background: var(--amber-dim); border-radius: 4px; padding: 1px 6px; }
+.hero-right{
+  position:relative;z-index:2;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+}
+#house-canvas{
+  display:block;
+  width:min(480px,44vw);
+  height:min(480px,44vw);
+  animation:float 6s ease-in-out infinite;
+}
+.canvas-hint{
+  font-size:10px;letter-spacing:3px;text-transform:uppercase;
+  color:var(--silver-dark);margin-top:16px;
+  display:flex;align-items:center;gap:8px;
+}
+.canvas-hint::before,.canvas-hint::after{content:'';flex:1;height:1px;background:rgba(168,184,176,.15);}
 
-  /* ── CODE BLOCK ── */
-  .code-block {
-    background: #010409;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    overflow: hidden;
-  }
-  .code-header {
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    padding: 10px 16px;
-    font-family: 'Space Mono', monospace;
-    font-size: 12px;
-    color: var(--muted);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .code-header .circle { width: 10px; height: 10px; border-radius: 50%; }
-  pre {
-    padding: 20px;
-    font-family: 'Space Mono', monospace;
-    font-size: 12px;
-    line-height: 1.7;
-    overflow-x: auto;
-    color: #cdd9e5;
-  }
-  .kw { color: #ff7b72; }
-  .fn { color: #d2a8ff; }
-  .str { color: #a5d6ff; }
-  .cm { color: #8b949e; }
-  .num { color: #79c0ff; }
+.sensor-overlay{
+  position:absolute;
+  top:20px;right:10px;
+  background:rgba(6,16,10,0.82);
+  border:1px solid var(--green-border);
+  border-radius:8px;
+  padding:14px 18px;
+  font-family:'Courier Prime',monospace;
+  font-size:11px;
+  color:var(--green);
+  line-height:2;
+  backdrop-filter:blur(8px);
+  animation:borderPulse 3s ease-in-out infinite;
+}
+.sensor-overlay .label{color:var(--silver-dark);font-size:10px;}
+.sensor-overlay .val{color:var(--green-light);font-weight:700;}
+.sensor-overlay .warn{color:var(--amber);}
 
-  /* ── SPECS TABLE ── */
-  .specs-table { width: 100%; border-collapse: collapse; font-size: 14px; }
-  .specs-table tr { border-bottom: 1px solid var(--border); }
-  .specs-table tr:last-child { border-bottom: none; }
-  .specs-table td { padding: 12px 16px; }
-  .specs-table td:first-child { color: var(--muted); font-family: 'Space Mono', monospace; font-size: 12px; width: 180px; }
-  .specs-table td:last-child { color: var(--text); font-weight: 600; }
+.stats-band{
+  display:grid;grid-template-columns:repeat(5,1fr);
+  background:var(--black3);
+  border-top:0.5px solid rgba(255,255,255,.05);
+  border-bottom:0.5px solid rgba(255,255,255,.05);
+}
+.stat-cell{
+  padding:48px 24px;text-align:center;
+  border-right:0.5px solid rgba(255,255,255,.05);
+  position:relative;overflow:hidden;
+  transition:background .3s;
+}
+.stat-cell:hover{background:rgba(63,185,80,.03);}
+.stat-cell:last-child{border-right:none;}
+.stat-cell::before{
+  content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);
+  width:40px;height:2px;
+  background:linear-gradient(90deg,transparent,var(--green),transparent);
+}
+.stat-num{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:52px;letter-spacing:2px;
+  color:var(--white);line-height:1;margin-bottom:8px;
+}
+.stat-unit{font-size:22px;color:var(--green);}
+.stat-label{font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--silver-dark);}
 
-  /* ── FOOTER ── */
-  footer {
-    padding: 40px 0;
-    text-align: center;
-    font-family: 'Space Mono', monospace;
-    font-size: 12px;
-    color: var(--muted);
-    border-top: 1px solid var(--border);
-  }
-  footer a { color: var(--blue); text-decoration: none; }
-  footer a:hover { text-decoration: underline; }
+.hardware-section{
+  padding:100px 64px;
+  display:grid;grid-template-columns:1fr 1fr;gap:80px;
+  align-items:center;
+  border-top:0.5px solid rgba(255,255,255,.05);
+  position:relative;
+}
+.hardware-section::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--green-border),transparent);
+}
+#pcb-canvas{width:100%;max-width:440px;height:340px;display:block;}
 
-  .toc {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-bottom: 40px;
-  }
-  .toc a {
-    font-family: 'Space Mono', monospace;
-    font-size: 12px;
-    color: var(--blue);
-    text-decoration: none;
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 4px 12px;
-  }
-  .toc a:hover { background: var(--blue-dim); border-color: var(--blue); }
+.section-tag{display:inline-flex;align-items:center;gap:10px;margin-bottom:20px;}
+.section-tag-line{width:32px;height:1px;background:var(--green);}
+.section-tag-text{font-size:10px;letter-spacing:4px;text-transform:uppercase;color:var(--green);font-weight:500;}
+.section-h2{
+  font-family:'Playfair Display',serif;
+  font-size:clamp(32px,4vw,52px);
+  font-weight:400;color:var(--white);
+  line-height:1.1;letter-spacing:-.5px;
+  margin-bottom:20px;
+}
+.section-h2 em{font-style:italic;color:var(--green);}
+.section-desc{font-size:15px;line-height:1.85;color:var(--silver-dark);font-weight:300;margin-bottom:36px;}
 
-  /* delay utilities */
-  .d1 { animation-delay: 0.05s; } .d2 { animation-delay: 0.10s; } .d3 { animation-delay: 0.15s; }
-  .d4 { animation-delay: 0.20s; } .d5 { animation-delay: 0.25s; } .d6 { animation-delay: 0.30s; }
-  .d7 { animation-delay: 0.35s; } .d8 { animation-delay: 0.40s; } .d9 { animation-delay: 0.45s; }
-  .d10 { animation-delay: 0.50s; } .d11 { animation-delay: 0.55s; } .d12 { animation-delay: 0.60s; }
+.spec-table{border:1px solid rgba(255,255,255,.06);overflow:hidden;}
+.spec-row{
+  display:grid;grid-template-columns:1fr 1fr;
+  border-bottom:0.5px solid rgba(255,255,255,.05);
+  transition:background .2s;
+}
+.spec-row:last-child{border-bottom:none;}
+.spec-row:hover{background:rgba(63,185,80,.04);}
+.spec-key{
+  padding:14px 20px;
+  font-size:10px;letter-spacing:2px;text-transform:uppercase;
+  color:var(--silver-dark);font-weight:500;
+  border-right:0.5px solid rgba(255,255,255,.05);
+}
+.spec-val{padding:14px 20px;font-family:'Courier Prime',monospace;font-size:13px;color:var(--silver-bright);}
+.spec-val.green{color:var(--green);}
+.spec-val.amber{color:var(--amber);}
+.spec-val.teal{color:var(--teal);}
+
+.wokwi-section{
+  padding:100px 64px;
+  background:var(--black2);
+  border-top:0.5px solid rgba(255,255,255,.05);
+  position:relative;overflow:hidden;
+}
+.wokwi-section::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--green-border),transparent);
+}
+.wokwi-section::after{
+  content:'';position:absolute;right:-200px;top:-200px;
+  width:600px;height:600px;
+  background:radial-gradient(circle,rgba(63,185,80,.05),transparent 60%);
+  pointer-events:none;
+}
+.wokwi-inner{
+  display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:start;
+  position:relative;z-index:1;
+}
+.wokwi-title{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(48px,6vw,80px);
+  line-height:.95;letter-spacing:2px;
+  color:var(--white);margin-bottom:16px;
+}
+.wokwi-title span{
+  background:linear-gradient(90deg,var(--green-light),var(--green));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.wokwi-desc{font-size:15px;line-height:1.85;color:var(--silver-dark);font-weight:300;margin-bottom:28px;}
+
+.chip-tags{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:36px;}
+.chip-tag{
+  background:rgba(255,255,255,.04);
+  border:0.5px solid rgba(255,255,255,.1);
+  padding:7px 16px;
+  font-size:10px;letter-spacing:2px;text-transform:uppercase;
+  color:var(--silver);font-weight:500;
+  transition:all .25s;
+}
+.chip-tag:hover{border-color:var(--green-border);color:var(--green);transform:translateY(-2px);}
+.chip-tag.green{border-color:var(--green-border);color:var(--green);}
+.chip-tag.amber{border-color:var(--amber-border);color:var(--amber);}
+.chip-tag.teal{border-color:rgba(0,180,170,.4);color:var(--teal);}
+
+.terminal{background:#030907;border:1px solid rgba(255,255,255,.08);overflow:hidden;}
+.terminal-bar{
+  background:#0a140d;
+  border-bottom:0.5px solid rgba(255,255,255,.08);
+  padding:12px 16px;
+  display:flex;align-items:center;gap:8px;
+}
+.t-dot{width:11px;height:11px;border-radius:50%;}
+.t-dot.r{background:#ff5f57;}.t-dot.y{background:#ffbd2e;}.t-dot.g{background:#28ca41;}
+.t-title{flex:1;text-align:center;font-size:10px;letter-spacing:2px;color:rgba(255,255,255,.2);text-transform:uppercase;}
+.terminal-body{padding:24px 28px;font-family:'Courier Prime',monospace;font-size:12.5px;line-height:2;}
+.tc{color:#6ab0ff;}.td{color:#3a5040;}.tg{color:#33ff88;}.tw{color:var(--silver-bright);}
+.tgreen{color:var(--green);}.tamber{color:var(--amber);}.twarn{color:#ff8855;}
+
+.typewriter{
+  overflow:hidden;white-space:nowrap;
+  border-right:2px solid var(--green);
+  animation:typewriter 3s steps(40,end) 1s forwards, blink .75s step-end infinite;
+  width:0;
+}
+
+.features-section{
+  padding:100px 64px;
+  border-top:0.5px solid rgba(255,255,255,.05);
+  position:relative;
+}
+.features-section::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--green-border),transparent);
+}
+.features-header{text-align:center;margin-bottom:72px;}
+.features-title{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(52px,7vw,88px);
+  letter-spacing:4px;color:var(--white);line-height:1;
+  margin-bottom:12px;
+}
+.features-title span{
+  background:linear-gradient(90deg,var(--green-light),var(--green));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.features-sub{font-size:15px;color:var(--silver-dark);font-weight:300;max-width:480px;margin:0 auto;}
+
+.feat-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:1px;
+  background:rgba(255,255,255,.04);
+}
+.feat-card{
+  background:var(--black);
+  padding:44px 36px;
+  position:relative;overflow:hidden;
+  transition:background .3s,transform .3s;
+}
+.feat-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--green-dim),var(--green),transparent);
+  opacity:0;transition:opacity .3s;
+}
+.feat-card:hover{background:var(--black2);transform:translateY(-4px);}
+.feat-card:hover::before{opacity:1;}
+.feat-card::after{
+  content:'';position:absolute;bottom:-40px;right:-40px;
+  width:120px;height:120px;
+  background:radial-gradient(circle,var(--green-glow),transparent 70%);
+  opacity:0;transition:opacity .3s;
+}
+.feat-card:hover::after{opacity:1;}
+.feat-num{font-family:'Courier Prime',monospace;font-size:11px;color:var(--green-dim);margin-bottom:28px;letter-spacing:2px;}
+.feat-icon-wrap{
+  width:48px;height:48px;
+  border:1px solid rgba(63,185,80,.2);
+  display:flex;align-items:center;justify-content:center;
+  margin-bottom:24px;
+  transition:border-color .3s,transform .3s;
+}
+.feat-card:hover .feat-icon-wrap{border-color:var(--green);transform:rotate(5deg);}
+.feat-icon-wrap svg{width:22px;height:22px;stroke:var(--green);fill:none;stroke-width:1.3;}
+.feat-title{font-family:'Playfair Display',serif;font-size:20px;font-weight:400;color:var(--white);margin-bottom:12px;letter-spacing:-.2px;}
+.feat-desc{font-size:13px;line-height:1.85;color:var(--silver-dark);font-weight:300;}
+
+.pinout-section{
+  padding:100px 64px;
+  background:var(--black2);
+  border-top:0.5px solid rgba(255,255,255,.05);
+  position:relative;
+}
+.pinout-section::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(63,185,80,.4),transparent);
+}
+.pinout-inner{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:start;}
+.pinout-h2{
+  font-family:'Playfair Display',serif;
+  font-size:clamp(28px,3.5vw,44px);
+  font-weight:400;color:var(--white);
+  line-height:1.15;margin-bottom:20px;
+}
+.pinout-h2 em{font-style:italic;color:var(--green);}
+.pinout-desc{font-size:15px;line-height:1.85;color:var(--silver-dark);font-weight:300;margin-bottom:36px;}
+
+.pin-table{width:100%;border-collapse:collapse;}
+.pin-table th{
+  font-size:9px;letter-spacing:3px;text-transform:uppercase;
+  color:var(--silver-dark);font-weight:500;
+  padding:10px 16px;text-align:left;
+  border-bottom:1px solid rgba(255,255,255,.06);
+}
+.pin-table td{
+  padding:12px 16px;
+  font-family:'Courier Prime',monospace;
+  font-size:12px;
+  border-bottom:0.5px solid rgba(255,255,255,.04);
+  transition:background .15s;
+}
+.pin-table tr:hover td{background:rgba(63,185,80,.03);}
+.pin-num{color:var(--green);}
+.pin-name{color:var(--white);}
+.pin-use{color:var(--silver-dark);}
+.pin-badge{display:inline-block;padding:3px 10px;font-size:9px;letter-spacing:1px;text-transform:uppercase;font-weight:500;}
+.pin-badge.digital{background:rgba(63,185,80,.1);color:var(--green);}
+.pin-badge.analog{background:rgba(201,168,76,.1);color:var(--amber);}
+.pin-badge.power{background:rgba(255,100,100,.1);color:#ff7070;}
+.pin-badge.i2c{background:rgba(0,180,170,.1);color:var(--teal);}
+
+/* ── PROJECTS ── */
+.projects-section{
+  padding:100px 64px;
+  border-top:0.5px solid rgba(255,255,255,.05);
+  position:relative;
+}
+.projects-section::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--green-border),transparent);
+}
+.projects-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;}
+.project-card{
+  background:var(--black2);
+  border:1px solid rgba(255,255,255,.06);
+  padding:24px 28px;
+  display:flex;gap:20px;
+  transition:all .3s;
+  position:relative;overflow:hidden;
+  text-decoration:none;
+}
+.project-card::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,var(--green-glow),transparent);
+  opacity:0;transition:opacity .3s;
+}
+.project-card:hover{border-color:var(--green-border);transform:translateY(-3px);}
+.project-card:hover::before{opacity:1;}
+.project-num{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:36px;color:var(--green);
+  line-height:1;flex-shrink:0;
+  opacity:.6;
+}
+.project-info h4{font-size:15px;font-weight:600;margin-bottom:6px;color:var(--white);}
+.project-info p{font-size:13px;color:var(--silver-dark);line-height:1.6;}
+.project-tag{
+  font-family:'Courier Prime',monospace;font-size:10px;
+  color:var(--amber);letter-spacing:1px;
+  margin-top:8px;display:block;
+}
+.project-link-badge{
+  position:absolute;top:14px;right:14px;
+  font-size:9px;letter-spacing:2px;text-transform:uppercase;
+  color:var(--green);
+  background:rgba(63,185,80,0.08);
+  border:0.5px solid var(--green-border);
+  padding:4px 10px;
+  display:flex;align-items:center;gap:5px;
+  transition:all .2s;
+}
+.project-card:hover .project-link-badge{background:rgba(63,185,80,0.18);border-color:var(--green);}
+.project-link-badge svg{width:9px;height:9px;stroke:var(--green);fill:none;stroke-width:2;}
+
+/* ── SOLO AUTHOR SECTION ── */
+.author-section{
+  padding:80px 64px;
+  background:var(--black2);
+  border-top:0.5px solid rgba(255,255,255,.05);
+  position:relative;
+}
+.author-section::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(63,185,80,.4),transparent);
+}
+.author-inner{
+  display:flex;flex-direction:column;align-items:center;
+  text-align:center;
+}
+.author-label{
+  font-size:10px;letter-spacing:4px;text-transform:uppercase;
+  color:var(--green);font-weight:500;margin-bottom:20px;
+  display:flex;align-items:center;gap:12px;
+}
+.author-label::before,.author-label::after{content:'';width:40px;height:1px;background:var(--green-border);}
+.author-card{
+  display:inline-flex;flex-direction:column;align-items:center;gap:16px;
+  background:rgba(63,185,80,0.06);
+  border:1px solid var(--green-border);
+  padding:40px 80px;
+  position:relative;overflow:hidden;
+  transition:all .3s;
+}
+.author-card::before{
+  content:'';position:absolute;bottom:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,var(--green),transparent);
+  transform:scaleX(0);transition:transform .4s;
+}
+.author-card:hover{background:rgba(63,185,80,0.1);border-color:var(--green);transform:translateY(-4px);}
+.author-card:hover::before{transform:scaleX(1);}
+.author-avatar{
+  width:64px;height:64px;
+  border:1.5px solid var(--green-border);
+  border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(63,185,80,0.08);
+  transition:border-color .3s;
+}
+.author-card:hover .author-avatar{border-color:var(--green);}
+.author-avatar svg{width:28px;height:28px;stroke:var(--green);fill:none;stroke-width:1.2;}
+.author-name{
+  font-family:'Playfair Display',serif;
+  font-size:clamp(28px,3vw,40px);
+  font-weight:500;color:var(--white);
+  letter-spacing:.5px;
+}
+.author-group{
+  font-family:'Courier Prime',monospace;
+  font-size:13px;color:var(--green);
+  letter-spacing:3px;text-transform:uppercase;
+}
+.author-role{
+  font-size:12px;letter-spacing:2px;text-transform:uppercase;
+  color:var(--silver-dark);margin-top:-4px;
+}
+
+footer{
+  background:var(--black);
+  border-top:0.5px solid rgba(255,255,255,.06);
+  padding:64px;
+}
+.footer-gold-line{height:1px;background:linear-gradient(90deg,transparent,var(--green-border),transparent);margin-bottom:40px;}
+.footer-top{
+  display:grid;grid-template-columns:1fr 1fr 1fr;gap:40px;
+  padding-bottom:48px;
+  border-bottom:0.5px solid rgba(255,255,255,.05);
+  margin-bottom:40px;
+}
+.footer-brand-name{font-family:'Playfair Display',serif;font-size:22px;font-weight:400;color:var(--white);margin-bottom:8px;letter-spacing:.5px;}
+.footer-brand-sub{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--silver-dark);}
+.footer-col-title{font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--green);font-weight:500;margin-bottom:16px;}
+.footer-col p{font-size:12px;color:var(--silver-dark);line-height:2;font-family:'Courier Prime',monospace;}
+.footer-bottom{display:flex;justify-content:space-between;align-items:center;}
+.footer-bottom p{font-size:11px;color:rgba(255,255,255,.2);letter-spacing:1px;}
+.footer-bottom a{color:var(--green);text-decoration:none;}
+.footer-bottom a:hover{text-decoration:underline;}
+
+.reveal{opacity:0;transform:translateY(30px);transition:opacity .8s cubic-bezier(.16,1,.3,1),transform .8s cubic-bezier(.16,1,.3,1);}
+.reveal.visible{opacity:1;transform:translateY(0);}
+
+.ripple-btn{position:relative;overflow:hidden;}
+.ripple-btn .ripple-circle{
+  position:absolute;border-radius:50%;
+  background:rgba(255,255,255,0.2);
+  animation:ripple .6s ease-out forwards;
+}
+
+#name-signature{
+  text-align:center;
+  padding:44px 0 60px;
+  background:#06100a;
+  border-top:0.5px solid rgba(255,255,255,.04);
+  font-family:'Playfair Display',serif;
+  font-style:italic;
+  font-weight:400;
+  font-size:clamp(32px,5vw,64px);
+  letter-spacing:3px;
+  background-image:linear-gradient(90deg,#1a4a28,#7ee787,#3fb950,#1a4a28);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+
+@media(max-width:1100px){
+  nav{padding:0 32px;}
+  .hero{grid-template-columns:1fr;padding:120px 32px 64px;text-align:center;}
+  #house-canvas{width:min(360px,80vw);height:min(360px,80vw);}
+  .hero-desc{margin:0 auto 48px;}
+  .hardware-section,.wokwi-inner,.pinout-inner{grid-template-columns:1fr;gap:48px;}
+  .hardware-section,.wokwi-section,.features-section,.pinout-section,.projects-section,.author-section{padding:72px 32px;}
+  .stats-band{grid-template-columns:repeat(3,1fr);}
+  .feat-grid{grid-template-columns:1fr 1fr;}
+  .projects-grid{grid-template-columns:1fr;}
+  footer{padding:48px 32px;}
+  .footer-top{grid-template-columns:1fr;}
+  .footer-bottom{flex-direction:column;gap:12px;text-align:center;}
+  .sensor-overlay{top:10px;right:5px;font-size:10px;padding:10px 12px;}
+  .author-card{padding:32px 40px;}
+}
+@media(max-width:700px){
+  .nav-links{display:none;}
+  .feat-grid{grid-template-columns:1fr;}
+  .stats-band{grid-template-columns:repeat(2,1fr);}
+}
 </style>
 </head>
 <body>
 
-<!-- TOP BAR -->
-<nav class="topbar">
-  <div class="inner">
-    <span class="repo-path">
-      <span>keyestudio</span> / <strong>KS0576-Smart-Eco-Friendly-House</strong>
-    </span>
-    <div class="badge">
-      <span class="badge-item"><span class="dot"></span> Arduino</span>
-      <span class="badge-item">⭐ C++</span>
-      <span class="badge-item">📜 MIT</span>
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+<div class="scanline"></div>
+
+<script>
+  for(let i=0;i<18;i++){
+    const p=document.createElement('div');
+    p.className='particle';
+    const size=Math.random()*4+1;
+    p.style.cssText=`
+      width:${size}px;height:${size}px;
+      left:${Math.random()*100}vw;top:${Math.random()*100}vh;
+      --dx:${(Math.random()-0.5)*60}px;
+      --dy:${(Math.random()-0.5)*60}px;
+      --dur:${4+Math.random()*6}s;
+      --delay:${Math.random()*4}s;
+      opacity:${Math.random()*0.15+0.05};
+    `;
+    document.body.appendChild(p);
+  }
+</script>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">
+    <div class="nav-logo-mark">
+      <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
     </div>
+    <div class="nav-name">Joyal Varghese</div>
   </div>
+  <ul class="nav-links">
+    <li><a href="#hardware">Hardware</a></li>
+    <li><a href="#simulation">Simulation</a></li>
+    <li><a href="#features">Features</a></li>
+    <li><a href="#pinout">Pinout</a></li>
+    <li><a href="#projects">Projects</a></li>
+  </ul>
+  <a class="nav-cta ripple-btn" href="https://wokwi.com/projects/463453944774474753" target="_blank">
+    <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+    Launch Sim
+  </a>
 </nav>
 
 <!-- HERO -->
 <section class="hero">
-  <div class="container">
-    <div class="hero-tag">Arduino Project · KS0576</div>
-    <h1>Smart <em>Eco-Friendly</em><br>House Kit</h1>
-    <p class="hero-sub">A wooden laser-cut smart home powered by the Keyestudio UNO PLUS board. Monitors temperature, humidity, UV, soil moisture, light, motion — and automates water irrigation, fan control, and alerts.</p>
-    <div class="hero-badges">
-      <span class="pill pill-green">✓ C++ / KidsBlock</span>
-      <span class="pill pill-amber">⚡ Solar Panel Included</span>
-      <span class="pill pill-blue">🌱 Eco-Focused STEM</span>
-      <span class="pill pill-green">11 Sensors & Modules</span>
+  <div class="hero-left">
+    <div class="hero-overline fu d1">
+      <span class="hero-overline-line"></span>
+      <span class="hero-overline-text">Engineering Portfolio · KS0576 · Group 4230z · 2026</span>
+    </div>
+    <h1 class="hero-h1 fu d2">
+      SMART
+      <span class="green-line">ECO HOUSE</span>
+    </h1>
+    <p class="hero-sub fu d3">Automated Home · Arduino UNO</p>
+
+    <div class="team-badge fu d3">
+      <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span>By <strong>Joyal Varghese</strong> &nbsp;·&nbsp; Group <strong>4230z</strong></span>
     </div>
 
-    <!-- Live readout simulation -->
-    <div class="hero-image-box">
-      <div class="hero-image-inner">
-        <pre class="ascii-house">
-     ___________/\___________
-    /                         \
-   /    SMART ECO-FRIENDLY      \
-  /___________HOUSE______________\
-  |   [LCD]  TEMP:28  HI:50      |
-  |   [===]  ILL:865  UV:1       |
-  |     🌿  [PUMP] [FAN]  🌿    |
-  |_______________________________|
-  |___[WHEEL]____[SOLAR]___________|
-        </pre>
-      </div>
-      <div class="sensor-readout">
-        TEMP: 28°C<br>
-        HUMI: 50%<br>
-        ILL: 865 lx<br>
-        UV: 1 (low)<br>
-        SOIL: dry ⚠<br>
-        PIR: clear
+    <p class="hero-desc fu d4">
+      Built on <span>Arduino UNO PLUS</span> — featuring
+      <span class="amber">auto-irrigation</span>, PIR motion detection,
+      solar UV sensing, I2C LCD dashboard, smart fan, and relay-controlled water pump.
+      Simulated live in Wokwi.
+    </p>
+    <div class="fu d5">
+      <a class="btn-green ripple-btn" href="https://wokwi.com/projects/463453944774474753" target="_blank">
+        <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        Launch simulation
+      </a>
+      <a class="btn-outline" href="#features">Explore features</a>
+    </div>
+  </div>
+
+  <div class="hero-right fu d3">
+    <div style="position:relative;">
+      <canvas id="house-canvas"></canvas>
+      <div class="sensor-overlay">
+        <div><span class="label">TEMP </span><span class="val" id="disp-temp">28°C</span></div>
+        <div><span class="label">HUMI </span><span class="val" id="disp-humi">52%</span></div>
+        <div><span class="label">SOIL </span><span class="warn" id="disp-soil">DRY ⚠</span></div>
+        <div><span class="label">ILL  </span><span class="val" id="disp-ill">865 lx</span></div>
+        <div><span class="label">UV   </span><span class="val" id="disp-uv">2</span></div>
+        <div><span class="label">PIR  </span><span class="val" id="disp-pir">clear</span></div>
       </div>
     </div>
+    <p class="canvas-hint">Live sensor simulation</p>
   </div>
 </section>
 
-<!-- TOC -->
-<div class="container" style="padding-top:32px; padding-bottom:8px;">
-  <nav class="toc">
-    <a href="#features">Features</a>
-    <a href="#components">Components</a>
-    <a href="#projects">Projects</a>
-    <a href="#pinout">Pinout</a>
-    <a href="#quickstart">Quick Start</a>
-    <a href="#specs">Specs</a>
-  </nav>
+<!-- STATS -->
+<div class="stats-band">
+  <div class="stat-cell reveal">
+    <div class="stat-num">11<span class="stat-unit">×</span></div>
+    <div class="stat-label">Sensors</div>
+  </div>
+  <div class="stat-cell reveal">
+    <div class="stat-num">8<span class="stat-unit"> </span></div>
+    <div class="stat-label">Projects</div>
+  </div>
+  <div class="stat-cell reveal">
+    <div class="stat-num">5<span class="stat-unit">V</span></div>
+    <div class="stat-label">Logic Level</div>
+  </div>
+  <div class="stat-cell reveal">
+    <div class="stat-num">16<span class="stat-unit">MHz</span></div>
+    <div class="stat-label">Clock Speed</div>
+  </div>
+  <div class="stat-cell reveal">
+    <div class="stat-num">I<span class="stat-unit">²C</span></div>
+    <div class="stat-label">Sensor Bus</div>
+  </div>
 </div>
 
+<!-- HARDWARE SECTION -->
+<section id="hardware" class="hardware-section">
+  <div class="reveal">
+    <canvas id="pcb-canvas"></canvas>
+  </div>
+  <div class="reveal">
+    <div class="section-tag">
+      <span class="section-tag-line"></span>
+      <span class="section-tag-text">Hardware Core</span>
+    </div>
+    <h2 class="section-h2">UNO PLUS<br/><em>KS0486 Board</em></h2>
+    <p class="section-desc">
+      The ATmega328P microcontroller manages all sensors, actuators, and the I2C LCD dashboard. Relay-triggered irrigation, PWM fan control, and PIR alarm run concurrently in the main loop.
+    </p>
+    <div class="spec-table">
+      <div class="spec-row"><div class="spec-key">MCU</div><div class="spec-val teal">ATmega328P-AU</div></div>
+      <div class="spec-row"><div class="spec-key">Clock</div><div class="spec-val green">16 MHz</div></div>
+      <div class="spec-row"><div class="spec-key">Flash</div><div class="spec-val">32 KB</div></div>
+      <div class="spec-row"><div class="spec-key">SRAM</div><div class="spec-val">2 KB</div></div>
+      <div class="spec-row"><div class="spec-key">Digital I/O</div><div class="spec-val green">14 pins</div></div>
+      <div class="spec-row"><div class="spec-key">Analog In</div><div class="spec-val">8 channels (A0–A7)</div></div>
+      <div class="spec-row"><div class="spec-key">PWM Pins</div><div class="spec-val amber">6 pins (Fan, Buzzer)</div></div>
+      <div class="spec-row"><div class="spec-key">I2C Bus</div><div class="spec-val">SDA A4 · SCL A5</div></div>
+      <div class="spec-row"><div class="spec-key">USB</div><div class="spec-val green">CP2102 USB-Serial</div></div>
+      <div class="spec-row"><div class="spec-key">Simulator</div><div class="spec-val teal">Wokwi · Live</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- WOKWI SECTION -->
+<section id="simulation" class="wokwi-section">
+  <div class="wokwi-inner">
+    <div class="reveal">
+      <div class="section-tag" style="margin-bottom:20px;">
+        <span class="section-tag-line"></span>
+        <span class="section-tag-text">Live Simulation</span>
+      </div>
+      <h2 class="wokwi-title">RUN IT<br/><span>LIVE.</span></h2>
+      <p class="wokwi-desc">
+        The complete smart home controller runs live in Wokwi. Adjust the soil sensor, trigger the PIR, and watch the relay-controlled water pump activate, the fan respond to temperature, and the LCD dashboard update in real time.
+      </p>
+      <div class="chip-tags">
+        <span class="chip-tag teal">XHT11 Temp/Humi</span>
+        <span class="chip-tag teal">PIR Motion</span>
+        <span class="chip-tag green">Soil Sensor</span>
+        <span class="chip-tag green">Water Pump</span>
+        <span class="chip-tag amber">Solar UV</span>
+        <span class="chip-tag amber">Relay Module</span>
+        <span class="chip-tag">I2C LCD</span>
+        <span class="chip-tag">LDR Photoresistor</span>
+        <span class="chip-tag">SK6812 RGB LED</span>
+        <span class="chip-tag">Passive Buzzer</span>
+      </div>
+      <a class="btn-green ripple-btn" href="https://wokwi.com/projects/463453944774474753" target="_blank" style="display:inline-flex;align-items:center;gap:12px;text-decoration:none;padding:15px 32px;font-size:10px;letter-spacing:4px;text-transform:uppercase;font-weight:600;color:var(--black);background:linear-gradient(135deg,var(--green-dim),var(--green),var(--green-dim));background-size:200% 100%;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        Launch smart house simulation
+      </a>
+    </div>
+
+    <div class="terminal reveal">
+      <div class="terminal-bar">
+        <div class="t-dot r"></div><div class="t-dot y"></div><div class="t-dot g"></div>
+        <div class="t-title">Arduino Serial Monitor · 9600 baud</div>
+      </div>
+      <div class="terminal-body" id="terminal-body">
+        <span class="td">▶ Smart Eco House v1.0 — ATmega328P</span><br/>
+        <span class="td">Initializing I2C bus... OK</span><br/>
+        <span class="td">LCD detected at 0x27</span><br/>
+        <span class="td">XHT11 on pin D10... OK</span><br/>
+        <span class="td">PIR sensor on pin D3...</span><br/>
+        <span class="td">Soil sensor on A2... OK</span><br/>
+        <span class="td">Relay (pump) on D7</span><br/>
+        <span class="td">UV sensor on A6</span><br/>
+        <span class="tgreen">───────────────────────</span><br/>
+        <span class="tg">[SYSTEM READY]</span> <span class="tw">all sensors live</span><br/>
+        <span class="tgreen">───────────────────────</span><br/>
+        Temp: <span class="tw">28°C</span>  Humi: <span class="tw">52%</span><br/>
+        Soil: <span class="tamber">DRY (312)</span> → <span class="tg">PUMP ON</span><br/>
+        Light: <span class="tw">865 lx</span>  UV: <span class="tw">2</span><br/>
+        <span class="td">──────────────────────</span><br/>
+        PIR: <span class="tw">clear</span>  Fan: <span class="tw">OFF</span><br/>
+        RGB: <span class="tw">green</span>  Buzz: <span class="tw">idle</span><br/>
+        <span class="tgreen">Loop: OK  I2C: OK  LCD: OK</span>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- FEATURES -->
-<section class="section" id="features">
-  <div class="container">
-    <div class="section-title">Features</div>
-    <div class="features-grid">
-      <div class="feature-card">
-        <div class="feature-icon">🌡️</div>
-        <h3>Environmental Sensing</h3>
-        <p>XHT11 monitors temperature & humidity. UV sensor tracks solar intensity in real time.</p>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">🌱</div>
-        <h3>Auto Plant Watering</h3>
-        <p>Soil humidity sensor triggers the relay-controlled water pump when soil is too dry.</p>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">☀️</div>
-        <h3>Solar Power Ready</h3>
-        <p>Integrated solar panel and water wheel for renewable energy demonstration.</p>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">🏠</div>
-        <h3>Smart Automation</h3>
-        <p>PIR motion detection, auto-lighting, fan control, and buzzer alert system.</p>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">📊</div>
-        <h3>LCD Dashboard</h3>
-        <p>I2C LCD1602 displays all sensor readings live: temp, humidity, illuminance, UV index.</p>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">🎓</div>
-        <h3>STEM Education</h3>
-        <p>12 guided projects with C++ and KidsBlock (Scratch) tutorials for all skill levels.</p>
-      </div>
+<section id="features" class="features-section">
+  <div class="features-header reveal">
+    <div class="section-tag" style="justify-content:center;">
+      <span class="section-tag-line"></span>
+      <span class="section-tag-text">System Features</span>
+      <span class="section-tag-line"></span>
+    </div>
+    <h2 class="features-title">HOME<br/><span>SYSTEMS</span></h2>
+    <p class="features-sub">Every subsystem engineered for a truly automated eco-friendly smart home.</p>
+  </div>
+
+  <div class="feat-grid reveal">
+    <div class="feat-card">
+      <div class="feat-num">01 / ENV</div>
+      <div class="feat-icon-wrap"><svg viewBox="0 0 24 24"><path d="M14 14.76V3.5a2.5 2.5 0 00-5 0v11.26a4.5 4.5 0 105 0z"/></svg></div>
+      <div class="feat-title">Temp &amp; Humidity</div>
+      <div class="feat-desc">XHT11 (DHT11-compatible) on D10 reads temperature and humidity. Values displayed live on I2C LCD. Fan activates automatically above 30°C.</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-num">02 / WATER</div>
+      <div class="feat-icon-wrap"><svg viewBox="0 0 24 24"><path d="M12 2.69l5.66 5.66a8 8 0 11-11.31 0z"/></svg></div>
+      <div class="feat-title">Auto Irrigation</div>
+      <div class="feat-desc">Capacitive soil sensor on A2 triggers the 5V relay (D7) to activate the water pump when moisture falls below threshold. Stops automatically when moist.</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-num">03 / LIGHT</div>
+      <div class="feat-icon-wrap"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg></div>
+      <div class="feat-title">Smart Lighting</div>
+      <div class="feat-desc">Photoresistor (LDR) on A1 enables auto-switching SK6812 RGB LED (D11). Illuminance reading shown on LCD. Smooth color transitions for ambience.</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-num">04 / PIR</div>
+      <div class="feat-icon-wrap"><svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></div>
+      <div class="feat-title">Motion Detection</div>
+      <div class="feat-desc">PIR passive infrared sensor on D3 detects intruders. Triggers passive buzzer (D9) alert tone and can activate RGB LED flash sequence for visual alarm.</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-num">05 / UV</div>
+      <div class="feat-icon-wrap"><svg viewBox="0 0 24 24"><path d="M17 18a5 5 0 00-10 0"/><line x1="12" y1="9" x2="12" y2="2"/><line x1="4.22" y1="10.22" x2="5.64" y2="11.64"/><line x1="1" y1="18" x2="3" y2="18"/><line x1="21" y1="18" x2="23" y2="18"/><line x1="18.36" y1="11.64" x2="19.78" y2="10.22"/></svg></div>
+      <div class="feat-title">Solar UV Sensing</div>
+      <div class="feat-desc">KS6032 UV sensor on A6 reads solar ultraviolet index. Displays safe/moderate/high labels on LCD. Integrated solar panel demonstrates renewable energy input.</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-num">06 / LCD</div>
+      <div class="feat-icon-wrap"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div>
+      <div class="feat-title">LCD Dashboard</div>
+      <div class="feat-desc">I2C LCD1602 at address 0x27 shows all sensor readings simultaneously: temp, humidity, illuminance, UV index. Refreshes every second via I2C bus.</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-num">07 / FAN</div>
+      <div class="feat-icon-wrap"><svg viewBox="0 0 24 24"><path d="M12 12c0-3-1.5-6-4-6 0 3 1 5 4 6zM12 12c3 0 6-1.5 6-4-3 0-5 1-6 4zM12 12c0 3 1.5 6 4 6 0-3-1-5-4-6zM12 12c-3 0-6 1.5-6 4 3 0 5-1 6-4z"/><circle cx="12" cy="12" r="2"/></svg></div>
+      <div class="feat-title">PWM Fan Control</div>
+      <div class="feat-desc">Fan motor on D5 (PWM) ramps up based on temperature. Solar panel can power the fan demonstrating green energy integration. Speed proportional to heat.</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-num">08 / RELAY</div>
+      <div class="feat-icon-wrap"><svg viewBox="0 0 24 24"><path d="M18.36 6.64a9 9 0 11-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg></div>
+      <div class="feat-title">5V Relay Module</div>
+      <div class="feat-desc">Single-channel 5V relay (KS6062) on D7 controls the DC water pump independently from the logic rail. Allows safe switching of higher-current loads.</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-num">09 / KEYPAD</div>
+      <div class="feat-icon-wrap"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></div>
+      <div class="feat-title">Five-Key Menu</div>
+      <div class="feat-desc">Five AD Key module on A0 provides analog-voltage keypad input for navigating LCD menu modes, adjusting thresholds, and selecting display pages without extra wiring.</div>
     </div>
   </div>
 </section>
 
-<!-- COMPONENTS -->
-<section class="section" id="components">
-  <div class="container">
-    <div class="section-title">Components</div>
-    <h2>Full Kit List</h2>
-    <div class="components-grid">
-
-      <div class="component-row d1">
-        <span class="comp-num">#01</span>
-        <span class="comp-icon">💡</span>
-        <div class="comp-info">
-          <div class="comp-name">SK6812 RGB Module</div>
-          <div class="comp-desc">KS6009 · addressable LED</div>
-        </div>
-        <span class="comp-qty">×1</span>
+<!-- PINOUT SECTION -->
+<section id="pinout" class="pinout-section">
+  <div class="pinout-inner">
+    <div class="reveal">
+      <div class="section-tag" style="margin-bottom:20px;">
+        <span class="section-tag-line"></span>
+        <span class="section-tag-text">Hardware Pinout</span>
       </div>
-
-      <div class="component-row d2">
-        <span class="comp-num">#02</span>
-        <span class="comp-icon">👁️</span>
-        <div class="comp-info">
-          <div class="comp-name">PIR Motion Sensor</div>
-          <div class="comp-desc">KS6018 · passive infrared</div>
-        </div>
-        <span class="comp-qty">×1</span>
-      </div>
-
-      <div class="component-row d3">
-        <span class="comp-num">#03</span>
-        <span class="comp-icon">☀️</span>
-        <div class="comp-info">
-          <div class="comp-name">Photoresistor (LDR)</div>
-          <div class="comp-desc">KS6026 · light sensing</div>
-        </div>
-        <span class="comp-qty">×1</span>
-      </div>
-
-      <div class="component-row d4">
-        <span class="comp-num">#04</span>
-        <span class="comp-icon">🌡️</span>
-        <div class="comp-info">
-          <div class="comp-name">XHT11 Temp & Humidity</div>
-          <div class="comp-desc">KS6033 · DHT11 compatible</div>
-        </div>
-        <span class="comp-qty">×1</span>
-      </div>
-
-      <div class="component-row d5">
-        <span class="comp-num">#05</span>
-        <span class="comp-icon">🖥️</span>
-        <div class="comp-info">
-          <div class="comp-name">I2C LCD1602 Display</div>
-          <div class="comp-desc">16×2 chars, I2C interface</div>
-        </div>
-        <span class="comp-qty">×1</span>
-      </div>
-
-      <div class="component-row d6">
-        <span class="comp-num">#06</span>
-        <span class="comp-icon">🎛️</span>
-        <div class="comp-info">
-          <div class="comp-name">Five AD Key Module</div>
-          <div class="comp-desc">KS6068 · analog keypad</div>
-        </div>
-        <span class="comp-qty">×1</span>
-      </div>
-
-      <div class="component-row d7">
-        <span class="comp-num">#07</span>
-        <span class="comp-icon">🌿</span>
-        <div class="comp-info">
-          <div class="comp-name">Soil Humidity Sensor</div>
-          <div class="comp-desc">KS0049 · capacitive probe</div>
-        </div>
-        <span class="comp-qty">×1</span>
-      </div>
-
-      <div class="component-row d8">
-        <span class="comp-num">#08</span>
-        <span class="comp-icon">💧</span>
-        <div class="comp-info">
-          <div class="comp-name">Water Level Sensor</div>
-          <div class="comp-desc">KS0048 · conductive strips</div>
-        </div>
-        <span class="comp-qty">×1</span>
-      </div>
-
-      <div class="component-row d9">
-        <span class="comp-num">#09</span>
-        <span class="comp-icon">⚡</span>
-        <div class="comp-info">
-          <div class="comp-name">Single 5V Relay Module</div>
-          <div class="comp-desc">KS6062 · controls water pump</div>
-        </div>
-        <span class="comp-qty">×1</span>
-      </div>
-
-      <div class="component-row d10">
-        <span class="comp-num">#10</span>
-        <span class="comp-icon">🔔</span>
-        <div class="comp-info">
-          <div class="comp-name">Passive Buzzer</div>
-          <div class="comp-desc">KS6011 · alert & melody</div>
-        </div>
-        <span class="comp-qty">×1</span>
-      </div>
-
-      <div class="component-row d11">
-        <span class="comp-num">#11</span>
-        <span class="comp-icon">🔆</span>
-        <div class="comp-info">
-          <div class="comp-name">Solar UV Sensor</div>
-          <div class="comp-desc">KS6032 · ultraviolet index</div>
-        </div>
-        <span class="comp-qty">×1</span>
-      </div>
-
-      <div class="component-row d12">
-        <span class="comp-num">#12</span>
-        <span class="comp-icon">🤖</span>
-        <div class="comp-info">
-          <div class="comp-name">UNO PLUS Main Board</div>
-          <div class="comp-desc">KS0486 · Arduino UNO compat.</div>
-        </div>
-        <span class="comp-qty">×1</span>
-      </div>
-
-      <div class="component-row">
-        <span class="comp-num">#13</span>
-        <span class="comp-icon">🔧</span>
-        <div class="comp-info">
-          <div class="comp-name">Water Pump (5V DC)</div>
-          <div class="comp-desc">OR0394 · mini submersible</div>
-        </div>
-        <span class="comp-qty">×1</span>
-      </div>
-
-      <div class="component-row">
-        <span class="comp-num">#14</span>
-        <span class="comp-icon">🌞</span>
-        <div class="comp-info">
-          <div class="comp-name">Solar Panel</div>
-          <div class="comp-desc">4401 · 5.5V photovoltaic</div>
-        </div>
-        <span class="comp-qty">×1</span>
-      </div>
-
-      <div class="component-row">
-        <span class="comp-num">#15</span>
-        <span class="comp-icon">💨</span>
-        <div class="comp-info">
-          <div class="comp-name">Fan (Propeller)</div>
-          <div class="comp-desc">ventilation & cooling demo</div>
-        </div>
-        <span class="comp-qty">×1</span>
-      </div>
-
-      <div class="component-row">
-        <span class="comp-num">#16</span>
-        <span class="comp-icon">🪵</span>
-        <div class="comp-info">
-          <div class="comp-name">Laser-cut Wooden Boards</div>
-          <div class="comp-desc">6-piece house frame set</div>
-        </div>
-        <span class="comp-qty">×1 set</span>
-      </div>
-
-      <div class="component-row">
-        <span class="comp-num">#17</span>
-        <span class="comp-icon">🔩</span>
-        <div class="comp-info">
-          <div class="comp-name">Hardware Pack</div>
-          <div class="comp-desc">M3/M4 screws, nuts, pillars</div>
-        </div>
-        <span class="comp-qty">×full</span>
-      </div>
-
-      <div class="component-row">
-        <span class="comp-num">#18</span>
-        <span class="comp-icon">🔌</span>
-        <div class="comp-info">
-          <div class="comp-name">Wires & DuPont Cables</div>
-          <div class="comp-desc">20/25/30cm M-M, F-F, M-F, 3P/4P</div>
-        </div>
-        <span class="comp-qty">×15+</span>
-      </div>
-
-    </div>
-  </div>
-</section>
-
-<!-- PROJECTS -->
-<section class="section" id="projects">
-  <div class="container">
-    <div class="section-title">Tutorial Projects</div>
-    <h2>12 Guided Projects</h2>
-    <div class="projects-list">
-
-      <div class="project-item">
-        <span class="project-num">01</span>
-        <div class="project-info">
-          <h4>RGB LED Control</h4>
-          <p>Control the SK6812 addressable LED — cycle colors, set brightness, and create light effects.</p>
-        </div>
-        <span class="project-tag">Digital I/O</span>
-      </div>
-
-      <div class="project-item">
-        <span class="project-num">02</span>
-        <div class="project-info">
-          <h4>PIR Motion Alarm</h4>
-          <p>Detect intruders using the passive infrared sensor and trigger the buzzer alarm.</p>
-        </div>
-        <span class="project-tag">Sensor + Alert</span>
-      </div>
-
-      <div class="project-item">
-        <span class="project-num">03</span>
-        <div class="project-info">
-          <h4>Smart Lighting</h4>
-          <p>Use the LDR photoresistor to auto-switch lights on at dusk and off at dawn.</p>
-        </div>
-        <span class="project-tag">Analog Read</span>
-      </div>
-
-      <div class="project-item">
-        <span class="project-num">04</span>
-        <div class="project-info">
-          <h4>Temperature & Humidity Monitor</h4>
-          <p>Read XHT11 sensor data and display live TEMP / HUMI on the I2C LCD1602.</p>
-        </div>
-        <span class="project-tag">I2C + DHT</span>
-      </div>
-
-      <div class="project-item">
-        <span class="project-num">05</span>
-        <div class="project-info">
-          <h4>LCD Dashboard</h4>
-          <p>Display all sensor readings simultaneously: temp, humidity, illuminance, UV index.</p>
-        </div>
-        <span class="project-tag">I2C Display</span>
-      </div>
-
-      <div class="project-item">
-        <span class="project-num">06</span>
-        <div class="project-info">
-          <h4>Keypad Menu</h4>
-          <p>Navigate modes using the Five AD Key module — read analog voltages to identify keys.</p>
-        </div>
-        <span class="project-tag">ADC Input</span>
-      </div>
-
-      <div class="project-item">
-        <span class="project-num">07</span>
-        <div class="project-info">
-          <h4>Soil Dry Alert</h4>
-          <p>Read soil moisture; flash LED and sound buzzer when the plant needs watering.</p>
-        </div>
-        <span class="project-tag">Threshold Logic</span>
-      </div>
-
-      <div class="project-item">
-        <span class="project-num">08</span>
-        <div class="project-info">
-          <h4>Water Level Monitor</h4>
-          <p>Track reservoir water level and warn before the tank runs empty.</p>
-        </div>
-        <span class="project-tag">Analog Sensor</span>
-      </div>
-
-      <div class="project-item">
-        <span class="project-num">09</span>
-        <div class="project-info">
-          <h4>Auto Irrigation System</h4>
-          <p>Relay-controlled pump activates automatically when soil is dry. Stops when moist.</p>
-        </div>
-        <span class="project-tag">Relay + Pump</span>
-      </div>
-
-      <div class="project-item">
-        <span class="project-num">10</span>
-        <div class="project-info">
-          <h4>UV Index Tracker</h4>
-          <p>Read the solar UV sensor and display the UV index with safe/moderate/high labels.</p>
-        </div>
-        <span class="project-tag">Analog UV</span>
-      </div>
-
-      <div class="project-item">
-        <span class="project-num">11</span>
-        <div class="project-info">
-          <h4>Solar Fan Controller</h4>
-          <p>Drive the fan when temperature exceeds a threshold; powered by the solar panel input.</p>
-        </div>
-        <span class="project-tag">PWM + Solar</span>
-      </div>
-
-      <div class="project-item">
-        <span class="project-num">12</span>
-        <div class="project-info">
-          <h4>Fully Integrated Eco House</h4>
-          <p>All sensors + actuators working together: smart light, auto watering, temp fan, UV alerts, motion alarm.</p>
-        </div>
-        <span class="project-tag">Complete System</span>
-      </div>
-
-    </div>
-  </div>
-</section>
-
-<!-- PINOUT -->
-<section class="section" id="pinout">
-  <div class="container">
-    <div class="section-title">Pinout</div>
-    <h2>UNO PLUS Wiring</h2>
-    <div class="pinout-grid">
-      <div class="pin-row"><span class="pin-name">SK6812 RGB LED</span><span class="pin-val">D11</span></div>
-      <div class="pin-row"><span class="pin-name">PIR Motion Sensor</span><span class="pin-val">D3</span></div>
-      <div class="pin-row"><span class="pin-name">Photoresistor (LDR)</span><span class="pin-val">A1</span></div>
-      <div class="pin-row"><span class="pin-name">XHT11 Temp/Humi</span><span class="pin-val">D10</span></div>
-      <div class="pin-row"><span class="pin-name">I2C LCD1602 SDA</span><span class="pin-val">A4</span></div>
-      <div class="pin-row"><span class="pin-name">I2C LCD1602 SCL</span><span class="pin-val">A5</span></div>
-      <div class="pin-row"><span class="pin-name">Five AD Key Module</span><span class="pin-val">A0</span></div>
-      <div class="pin-row"><span class="pin-name">Soil Humidity Sensor</span><span class="pin-val">A2</span></div>
-      <div class="pin-row"><span class="pin-name">Water Level Sensor</span><span class="pin-val">A3</span></div>
-      <div class="pin-row"><span class="pin-name">Relay (Water Pump)</span><span class="pin-val">D7</span></div>
-      <div class="pin-row"><span class="pin-name">Passive Buzzer</span><span class="pin-val">D9</span></div>
-      <div class="pin-row"><span class="pin-name">Solar UV Sensor</span><span class="pin-val">A6</span></div>
-      <div class="pin-row"><span class="pin-name">Fan Motor</span><span class="pin-val">D5 (PWM)</span></div>
-      <div class="pin-row"><span class="pin-name">VCC (sensors)</span><span class="pin-val">5V</span></div>
-      <div class="pin-row"><span class="pin-name">GND (common)</span><span class="pin-val">GND</span></div>
-    </div>
-  </div>
-</section>
-
-<!-- QUICKSTART -->
-<section class="section" id="quickstart">
-  <div class="container">
-    <div class="section-title">Quick Start</div>
-    <h2>Get Up & Running</h2>
-    <div class="code-block">
-      <div class="code-header">
-        <span class="circle" style="background:#f85149"></span>
-        <span class="circle" style="background:#d29922; margin-left:4px"></span>
-        <span class="circle" style="background:#3fb950; margin-left:4px"></span>
-        <span style="margin-left:12px; color: var(--muted);">SmartEcoHouse.ino — main sketch</span>
-      </div>
-<pre><span class="cm">// Keyestudio Smart Eco-Friendly House — KS0576
-// Requires: Adafruit_NeoPixel, DHT, LiquidCrystal_I2C</span>
-
-<span class="kw">#include</span> <span class="str">&lt;Adafruit_NeoPixel.h&gt;</span>
-<span class="kw">#include</span> <span class="str">&lt;DHT.h&gt;</span>
-<span class="kw">#include</span> <span class="str">&lt;Wire.h&gt;</span>
-<span class="kw">#include</span> <span class="str">&lt;LiquidCrystal_I2C.h&gt;</span>
-
-<span class="cm">// ── Pin Definitions ──────────────────────────────</span>
-<span class="kw">#define</span> RGB_PIN     <span class="num">11</span>
-<span class="kw">#define</span> PIR_PIN     <span class="num">3</span>
-<span class="kw">#define</span> LDR_PIN     <span class="num">A1</span>
-<span class="kw">#define</span> DHT_PIN     <span class="num">10</span>
-<span class="kw">#define</span> SOIL_PIN    <span class="num">A2</span>
-<span class="kw">#define</span> WATER_PIN   <span class="num">A3</span>
-<span class="kw">#define</span> RELAY_PIN   <span class="num">7</span>
-<span class="kw">#define</span> BUZZER_PIN  <span class="num">9</span>
-<span class="kw">#define</span> UV_PIN      <span class="num">A6</span>
-<span class="kw">#define</span> FAN_PIN     <span class="num">5</span>
-
-<span class="cm">// ── Object Instantiation ─────────────────────────</span>
-Adafruit_NeoPixel rgb(<span class="num">1</span>, RGB_PIN, NEO_GRB + NEO_KHZ800);
-DHT dht(DHT_PIN, DHT11);
-LiquidCrystal_I2C lcd(<span class="num">0x27</span>, <span class="num">16</span>, <span class="num">2</span>);
-
-<span class="kw">void</span> <span class="fn">setup</span>() {
-  Serial.<span class="fn">begin</span>(<span class="num">9600</span>);
-  rgb.<span class="fn">begin</span>(); dht.<span class="fn">begin</span>();
-  lcd.<span class="fn">init</span>(); lcd.<span class="fn">backlight</span>();
-  <span class="fn">pinMode</span>(PIR_PIN,    INPUT);
-  <span class="fn">pinMode</span>(RELAY_PIN,  OUTPUT);
-  <span class="fn">pinMode</span>(BUZZER_PIN, OUTPUT);
-  <span class="fn">pinMode</span>(FAN_PIN,    OUTPUT);
-}
-
-<span class="kw">void</span> <span class="fn">loop</span>() {
-  <span class="kw">float</span> temp = dht.<span class="fn">readTemperature</span>();
-  <span class="kw">float</span> humi = dht.<span class="fn">readHumidity</span>();
-  <span class="kw">int</span>   soil = <span class="fn">analogRead</span>(SOIL_PIN);
-  <span class="kw">int</span>   ldr  = <span class="fn">analogRead</span>(LDR_PIN);
-  <span class="kw">int</span>   uv   = <span class="fn">analogRead</span>(UV_PIN);
-  <span class="kw">bool</span>  pir  = <span class="fn">digitalRead</span>(PIR_PIN);
-
-  <span class="cm">// LCD: show temp, humidity, illuminance, UV</span>
-  lcd.<span class="fn">setCursor</span>(<span class="num">0</span>, <span class="num">0</span>);
-  lcd.<span class="fn">print</span>(<span class="str">"T:"</span>); lcd.<span class="fn">print</span>(<span class="kw">(int)</span>temp);
-  lcd.<span class="fn">print</span>(<span class="str">" H:"</span>); lcd.<span class="fn">print</span>(<span class="kw">(int)</span>humi);
-  lcd.<span class="fn">setCursor</span>(<span class="num">0</span>, <span class="num">1</span>);
-  lcd.<span class="fn">print</span>(<span class="str">"L:"</span>); lcd.<span class="fn">print</span>(ldr);
-  lcd.<span class="fn">print</span>(<span class="str">" UV:"</span>); lcd.<span class="fn">print</span>(uv/<span class="num">100</span>);
-
-  <span class="cm">// Auto-irrigation: pump on if soil is dry</span>
-  <span class="fn">digitalWrite</span>(RELAY_PIN, soil &lt; <span class="num">400</span> ? HIGH : LOW);
-
-  <span class="cm">// Smart fan: on if temp above 30°C</span>
-  <span class="fn">analogWrite</span>(FAN_PIN, temp &gt; <span class="num">30</span> ? <span class="num">200</span> : <span class="num">0</span>);
-
-  <span class="cm">// Motion alarm: buzz if PIR triggered</span>
-  <span class="kw">if</span> (pir) { <span class="fn">tone</span>(BUZZER_PIN, <span class="num">1000</span>, <span class="num">300</span>); }
-
-  <span class="fn">delay</span>(<span class="num">1000</span>);
-}</pre>
-    </div>
-
-    <div style="margin-top:20px; background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:20px;">
-      <div class="section-title" style="margin-bottom:14px;">Installation</div>
-      <div class="code-block">
-        <div class="code-header"><span style="color:var(--muted);">bash</span></div>
-<pre><span class="cm"># 1. Clone the repository</span>
-git clone https://github.com/keyestudio/KS0576-Keyestudio-Smart-Eco-Friendly-House-Kit
-
-<span class="cm"># 2. Open in Arduino IDE and install libraries:</span>
-<span class="cm">#    Sketch → Include Library → Manage Libraries</span>
-<span class="cm">#    - Adafruit NeoPixel</span>
-<span class="cm">#    - DHT sensor library (Adafruit)</span>
-<span class="cm">#    - LiquidCrystal I2C (Frank de Brabander)</span>
-
-<span class="cm"># 3. Select board:  Tools → Board → Arduino UNO</span>
-<span class="cm"># 4. Select port:   Tools → Port → (your COM port)</span>
-<span class="cm"># 5. Upload:        Sketch → Upload  (Ctrl+U)</span></pre>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- SPECS -->
-<section class="section" id="specs">
-  <div class="container">
-    <div class="section-title">Specifications</div>
-    <h2>UNO PLUS Board</h2>
-    <div style="background:var(--surface); border:1px solid var(--border); border-radius:8px; overflow:hidden;">
-      <table class="specs-table">
-        <tr><td>Microcontroller</td><td>ATmega328P-AU</td></tr>
-        <tr><td>Operating Voltage</td><td>5V DC</td></tr>
-        <tr><td>Input Voltage</td><td>7–12V (DC jack)</td></tr>
-        <tr><td>Digital I/O Pins</td><td>14 (6× PWM capable)</td></tr>
-        <tr><td>Analog Input Pins</td><td>8 (A0–A7)</td></tr>
-        <tr><td>Flash Memory</td><td>32 KB (0.5 KB bootloader)</td></tr>
-        <tr><td>SRAM</td><td>2 KB</td></tr>
-        <tr><td>Clock Speed</td><td>16 MHz</td></tr>
-        <tr><td>USB Interface</td><td>CP2102 USB-to-Serial</td></tr>
-        <tr><td>Programming Languages</td><td>C / C++ · KidsBlock (Scratch)</td></tr>
-        <tr><td>Compatible IDE</td><td>Arduino IDE 1.8 / 2.x</td></tr>
-        <tr><td>Structure Material</td><td>Laser-cut wood + acrylic</td></tr>
-        <tr><td>Kit Reference</td><td>KS0576</td></tr>
+      <h2 class="pinout-h2">UNO PLUS<br/><em>Pin Mapping</em></h2>
+      <p class="pinout-desc">Every pin assignment for the smart house — from relay outputs to I2C sensor bus, analog sensors, and digital actuators.</p>
+      <table class="pin-table">
+        <thead>
+          <tr><th>Pin</th><th>Signal</th><th>Device</th><th>Type</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="pin-num">D3</td><td class="pin-name">PIR</td><td class="pin-use">PIR Motion Sensor</td><td><span class="pin-badge digital">Digital</span></td></tr>
+          <tr><td class="pin-num">D5</td><td class="pin-name">FAN</td><td class="pin-use">Fan Motor (PWM)</td><td><span class="pin-badge analog">PWM</span></td></tr>
+          <tr><td class="pin-num">D7</td><td class="pin-name">RELAY</td><td class="pin-use">Water Pump Relay</td><td><span class="pin-badge digital">Digital</span></td></tr>
+          <tr><td class="pin-num">D9</td><td class="pin-name">BUZZ</td><td class="pin-use">Passive Buzzer</td><td><span class="pin-badge analog">PWM</span></td></tr>
+          <tr><td class="pin-num">D10</td><td class="pin-name">DHT</td><td class="pin-use">XHT11 Temp/Humidity</td><td><span class="pin-badge digital">Digital</span></td></tr>
+          <tr><td class="pin-num">D11</td><td class="pin-name">RGB</td><td class="pin-use">SK6812 NeoPixel</td><td><span class="pin-badge analog">PWM</span></td></tr>
+          <tr><td class="pin-num">A0</td><td class="pin-name">KEYS</td><td class="pin-use">Five AD Key Module</td><td><span class="pin-badge analog">Analog</span></td></tr>
+          <tr><td class="pin-num">A1</td><td class="pin-name">LDR</td><td class="pin-use">Photoresistor (LDR)</td><td><span class="pin-badge analog">Analog</span></td></tr>
+          <tr><td class="pin-num">A2</td><td class="pin-name">SOIL</td><td class="pin-use">Soil Humidity Sensor</td><td><span class="pin-badge analog">Analog</span></td></tr>
+          <tr><td class="pin-num">A3</td><td class="pin-name">WLVL</td><td class="pin-use">Water Level Sensor</td><td><span class="pin-badge analog">Analog</span></td></tr>
+          <tr><td class="pin-num">A4</td><td class="pin-name">SDA</td><td class="pin-use">LCD I2C Data</td><td><span class="pin-badge i2c">I²C</span></td></tr>
+          <tr><td class="pin-num">A5</td><td class="pin-name">SCL</td><td class="pin-use">LCD I2C Clock</td><td><span class="pin-badge i2c">I²C</span></td></tr>
+          <tr><td class="pin-num">A6</td><td class="pin-name">UV</td><td class="pin-use">Solar UV Sensor</td><td><span class="pin-badge analog">Analog</span></td></tr>
+          <tr><td class="pin-num">5V</td><td class="pin-name">VCC</td><td class="pin-use">Sensor Power Rail</td><td><span class="pin-badge power">Power</span></td></tr>
+          <tr><td class="pin-num">GND</td><td class="pin-name">GND</td><td class="pin-use">Common Ground</td><td><span class="pin-badge power">Power</span></td></tr>
+        </tbody>
       </table>
+    </div>
+    <div class="reveal">
+      <div class="section-tag" style="margin-bottom:20px;">
+        <span class="section-tag-line"></span>
+        <span class="section-tag-text">Libraries Used</span>
+      </div>
+      <h2 class="pinout-h2" style="font-size:clamp(24px,2.8vw,36px);">Arduino<br/><em>Dependencies</em></h2>
+      <p class="pinout-desc">All libraries available in Arduino IDE Library Manager and pre-loaded in the Wokwi simulation.</p>
+      <div class="spec-table">
+        <div class="spec-row"><div class="spec-key">Wire.h</div><div class="spec-val teal">I2C communication</div></div>
+        <div class="spec-row"><div class="spec-key">LiquidCrystal_I2C</div><div class="spec-val green">16×2 LCD driver</div></div>
+        <div class="spec-row"><div class="spec-key">DHT.h</div><div class="spec-val amber">Temp/humidity sensor</div></div>
+        <div class="spec-row"><div class="spec-key">Adafruit_NeoPixel</div><div class="spec-val">SK6812 RGB LED</div></div>
+        <div class="spec-row"><div class="spec-key">Arduino.h</div><div class="spec-val teal">Core + tone() for buzzer</div></div>
+      </div>
+      <br/>
+      <div class="section-tag" style="margin-bottom:16px;">
+        <span class="section-tag-line"></span>
+        <span class="section-tag-text">Automation Thresholds</span>
+      </div>
+      <div class="spec-table">
+        <div class="spec-row"><div class="spec-key">Soil dry</div><div class="spec-val amber">&lt; 400 (analog)</div></div>
+        <div class="spec-row"><div class="spec-key">Fan on temp</div><div class="spec-val green">&gt; 30°C</div></div>
+        <div class="spec-row"><div class="spec-key">Light auto-on</div><div class="spec-val">&lt; 300 lx</div></div>
+        <div class="spec-row"><div class="spec-key">UV moderate</div><div class="spec-val amber">&gt; 3 index</div></div>
+        <div class="spec-row"><div class="spec-key">UV high alert</div><div class="spec-val">color: #ff4444</div></div>
+        <div class="spec-row"><div class="spec-key">PIR buzz</div><div class="spec-val teal">1000 Hz · 300 ms</div></div>
+        <div class="spec-row"><div class="spec-key">Loop delay</div><div class="spec-val green">1000 ms</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROJECTS — 8 tasks with Wokwi links -->
+<section id="projects" class="projects-section">
+  <div class="features-header reveal">
+    <div class="section-tag" style="justify-content:center;">
+      <span class="section-tag-line"></span>
+      <span class="section-tag-text">Tutorial Projects · Group 4230z</span>
+      <span class="section-tag-line"></span>
+    </div>
+    <h2 class="features-title">08<br/><span>TASKS</span></h2>
+    <p class="features-sub">Eight guided Wokwi simulations — click any card to launch the live simulation.</p>
+  </div>
+  <div class="projects-grid reveal">
+
+    <a class="project-card" href="https://wokwi.com/projects/464651520583060481" target="_blank" rel="noopener">
+      <div class="project-link-badge">
+        <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        Wokwi
+      </div>
+      <div class="project-num">01</div>
+      <div class="project-info">
+        <h4>RGB LED Control</h4>
+        <p>Drive the SK6812 addressable LED — cycle colors, set brightness, create ambient light effects via NeoPixel.</p>
+        <span class="project-tag">Digital I/O · SK6812</span>
+      </div>
+    </a>
+
+    <a class="project-card" href="https://wokwi.com/projects/464651702725984257" target="_blank" rel="noopener">
+      <div class="project-link-badge">
+        <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        Wokwi
+      </div>
+      <div class="project-num">02</div>
+      <div class="project-info">
+        <h4>PIR Motion Alarm</h4>
+        <p>Detect intruders with the PIR sensor and trigger the passive buzzer alarm sequence on D9.</p>
+        <span class="project-tag">Sensor + Alert · PIR</span>
+      </div>
+    </a>
+
+    <a class="project-card" href="https://wokwi.com/projects/464651752307911681" target="_blank" rel="noopener">
+      <div class="project-link-badge">
+        <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        Wokwi
+      </div>
+      <div class="project-num">03</div>
+      <div class="project-info">
+        <h4>Smart Lighting</h4>
+        <p>Use the LDR photoresistor on A1 to auto-switch the LED on at dusk and off at dawn.</p>
+        <span class="project-tag">Analog Read · LDR</span>
+      </div>
+    </a>
+
+    <a class="project-card" href="https://wokwi.com/projects/464651798593111041" target="_blank" rel="noopener">
+      <div class="project-link-badge">
+        <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        Wokwi
+      </div>
+      <div class="project-num">04</div>
+      <div class="project-info">
+        <h4>Temp &amp; Humidity Monitor</h4>
+        <p>Read XHT11 data and display live TEMP / HUMI readings on the I2C LCD1602 dashboard.</p>
+        <span class="project-tag">I2C + DHT · XHT11</span>
+      </div>
+    </a>
+
+    <a class="project-card" href="https://wokwi.com/projects/464651838885703681" target="_blank" rel="noopener">
+      <div class="project-link-badge">
+        <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        Wokwi
+      </div>
+      <div class="project-num">05</div>
+      <div class="project-info">
+        <h4>LCD Dashboard</h4>
+        <p>Show all sensor readings simultaneously — temp, humidity, illuminance, UV index on I2C LCD.</p>
+        <span class="project-tag">I2C Display · LCD1602</span>
+      </div>
+    </a>
+
+    <a class="project-card" href="https://wokwi.com/projects/464651889397711873" target="_blank" rel="noopener">
+      <div class="project-link-badge">
+        <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        Wokwi
+      </div>
+      <div class="project-num">06</div>
+      <div class="project-info">
+        <h4>Soil Dry Alert</h4>
+        <p>Read soil moisture on A2; flash LED and sound buzzer when the plant needs watering.</p>
+        <span class="project-tag">Threshold Logic · A2</span>
+      </div>
+    </a>
+
+    <a class="project-card" href="https://wokwi.com/projects/464651926893749249" target="_blank" rel="noopener">
+      <div class="project-link-badge">
+        <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        Wokwi
+      </div>
+      <div class="project-num">07</div>
+      <div class="project-info">
+        <h4>Auto Irrigation</h4>
+        <p>Relay-controlled pump activates when soil sensor reads dry. Stops automatically when moisture is restored.</p>
+        <span class="project-tag">Relay + Pump · D7</span>
+      </div>
+    </a>
+
+    <a class="project-card" href="https://wokwi.com/projects/464651966513155073" target="_blank" rel="noopener">
+      <div class="project-link-badge">
+        <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        Wokwi
+      </div>
+      <div class="project-num">08</div>
+      <div class="project-info">
+        <h4>Solar Fan Controller</h4>
+        <p>Drive the PWM fan when temperature exceeds threshold; solar panel demo powers the system.</p>
+        <span class="project-tag">PWM + Solar · D5</span>
+      </div>
+    </a>
+
+  </div>
+</section>
+
+<!-- AUTHOR SECTION (solo — Joyal Varghese) -->
+<section class="author-section">
+  <div class="author-inner reveal">
+    <div class="author-label">Author</div>
+    <div class="author-card">
+      <div class="author-avatar">
+        <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      </div>
+      <div class="author-name">Joyal Varghese</div>
+      <div class="author-group">Group 4230z</div>
+      <div class="author-role">Arduino · Embedded Systems · Smart Eco House</div>
     </div>
   </div>
 </section>
 
 <!-- FOOTER -->
 <footer>
-  <div class="container">
-    <p style="margin-bottom:10px;">
-      📖 <a href="https://docs.keyestudio.com/projects/KS0576/en/latest/">Full Wiki Documentation</a>
-      &nbsp;·&nbsp;
-      🐙 <a href="https://github.com/keyestudio/KS0576-Keyestudio-Smart-Eco-Friendly-House-Kit">GitHub Repository</a>
-      &nbsp;·&nbsp;
-      🛒 <a href="https://www.keyestudio.com">keyestudio.com</a>
-    </p>
-    <p style="margin-top:8px; opacity:0.5;">KS0576 · Keyestudio Smart Eco-Friendly House · MIT License · KEYES Corporation</p>
+  <div class="footer-gold-line"></div>
+  <div class="footer-top">
+    <div>
+      <div class="footer-brand-name">Joyal Varghese</div>
+      <div class="footer-brand-sub">Arduino · Smart Eco House · Group 4230z</div>
+    </div>
+    <div class="footer-col">
+      <div class="footer-col-title">Project</div>
+      <p>Repository: JOYALVARGHESE07/Robotics</p>
+      <p>Simulation: Wokwi · Arduino UNO</p>
+      <p>Language: C++ / Arduino IDE</p>
+      <p>Kit: Keyestudio KS0576</p>
+    </div>
+    <div class="footer-col">
+      <div class="footer-col-title">Details</div>
+      <p>Author: Joyal Varghese</p>
+      <p>Group: 4230z</p>
+      <p>MCU: ATmega328P @ 16 MHz</p>
+      <p>Actuators: Relay + Fan + Pump</p>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2026 Engineering Portfolio — <strong>Joyal Varghese</strong> · Group <strong>4230z</strong></p>
+    <p><a href="https://wokwi.com/projects/463453944774474753" target="_blank">wokwi.com/projects/463453944774474753</a></p>
   </div>
 </footer>
 
+<div id="name-signature">Joyal Varghese</div>
+
+<script>
+const cur = document.getElementById('cursor');
+const ring = document.getElementById('cursor-ring');
+let cx2=0,cy2=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{
+  cx2=e.clientX;cy2=e.clientY;
+  cur.style.left=cx2+'px';cur.style.top=cy2+'px';
+});
+function animRing(){
+  rx+=(cx2-rx)*0.12;ry+=(cy2-ry)*0.12;
+  ring.style.left=rx+'px';ring.style.top=ry+'px';
+  requestAnimationFrame(animRing);
+}animRing();
+document.querySelectorAll('a,button,.feat-card,.project-card,.author-card').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{
+    cur.style.width='20px';cur.style.height='20px';
+    ring.style.width='56px';ring.style.height='56px';
+    ring.style.borderColor='rgba(63,185,80,0.8)';
+  });
+  el.addEventListener('mouseleave',()=>{
+    cur.style.width='12px';cur.style.height='12px';
+    ring.style.width='36px';ring.style.height='36px';
+    ring.style.borderColor='rgba(63,185,80,0.5)';
+  });
+});
+
+document.querySelectorAll('.ripple-btn').forEach(btn=>{
+  btn.addEventListener('click',e=>{
+    const r=btn.getBoundingClientRect();
+    const c=document.createElement('span');
+    c.className='ripple-circle';
+    const size=Math.max(btn.offsetWidth,btn.offsetHeight)*2;
+    c.style.cssText=`width:${size}px;height:${size}px;left:${e.clientX-r.left-size/2}px;top:${e.clientY-r.top-size/2}px;`;
+    btn.appendChild(c);
+    setTimeout(()=>c.remove(),700);
+  });
+});
+
+const revealEls = document.querySelectorAll('.reveal');
+const obs = new IntersectionObserver(entries=>{
+  entries.forEach((e,i)=>{
+    if(e.isIntersecting){
+      setTimeout(()=>e.target.classList.add('visible'),i*80);
+      obs.unobserve(e.target);
+    }
+  });
+},{threshold:0.1});
+revealEls.forEach(el=>obs.observe(el));
+
+let simT=0;
+function updateSensors(){
+  simT+=0.02;
+  const temp=(26+3*Math.sin(simT*0.3)).toFixed(1);
+  const humi=(50+8*Math.sin(simT*0.2+1)).toFixed(0);
+  const soil=Math.sin(simT*0.15)>0.3?'WET ✓':'DRY ⚠';
+  const soilClass=soil.includes('WET')?'val':'warn';
+  const ill=(700+200*Math.abs(Math.sin(simT*0.1))).toFixed(0);
+  const uv=(1+2*Math.abs(Math.sin(simT*0.08))).toFixed(0);
+  const pir=Math.random()>0.96?'MOTION!':'clear';
+  document.getElementById('disp-temp').textContent=temp+'°C';
+  document.getElementById('disp-humi').textContent=humi+'%';
+  const soilEl=document.getElementById('disp-soil');
+  soilEl.textContent=soil;soilEl.className=soilClass;
+  document.getElementById('disp-ill').textContent=ill+' lx';
+  document.getElementById('disp-uv').textContent=uv;
+  const pirEl=document.getElementById('disp-pir');
+  pirEl.textContent=pir;
+  pirEl.style.color=pir==='MOTION!'?'#ff4444':'';
+}
+setInterval(updateSensors,1200);
+
+const termEl=document.getElementById('terminal-body');
+const lines=[
+  ()=>`Temp: <span class="tw">${(26+Math.random()*4).toFixed(1)}°C</span>  Humi: <span class="tw">${(48+Math.random()*10).toFixed(0)}%</span>`,
+  ()=>`Soil: <span class="${Math.random()>.5?'tg tamber':'twarn'}">${Math.random()>.5?'MOIST (512)':'DRY (298)'}</span> → <span class="${Math.random()>.5?'td':'tg'}">${Math.random()>.5?'PUMP OFF':'PUMP ON'}</span>`,
+  ()=>`UV: <span class="tw">${(Math.random()*4+1).toFixed(0)}</span>  Light: <span class="tw">${(600+Math.random()*400).toFixed(0)} lx</span>`,
+  ()=>`PIR: <span class="${Math.random()>.85?'twarn':'tg'}">${Math.random()>.85?'MOTION DETECTED':'clear'}</span>  Fan: <span class="tw">${Math.random()>.5?'ON 160':'OFF'}</span>`,
+  ()=>`<span class="tgreen">Loop OK  I2C OK  LCD OK</span>`,
+];
+let lineIdx=0;
+setInterval(()=>{
+  const div=document.createElement('div');
+  div.innerHTML=lines[lineIdx%lines.length]();
+  div.style.opacity='0';div.style.transition='opacity .5s';
+  termEl.appendChild(div);
+  setTimeout(()=>div.style.opacity='1',50);
+  if(termEl.children.length>22)termEl.removeChild(termEl.firstChild);
+  lineIdx++;
+},2000);
+
+(function(){
+  const cv=document.getElementById('house-canvas');
+  const ctx=cv.getContext('2d');
+  const S=500; cv.width=S; cv.height=S;
+  let t=0;
+  const GREEN='#3fb950', GREENL='#7ee787', AMBER='#c9a84c', TEAL='#00b4aa', SIL='#a8b8b0';
+  function grd(x1,y1,x2,y2,stops){const g=ctx.createLinearGradient(x1,y1,x2,y2);stops.forEach(([p,c])=>g.addColorStop(p,c));return g;}
+  function rgd(x,y,r0,r1,stops){const g=ctx.createRadialGradient(x,y,r0,x,y,r1);stops.forEach(([p,c])=>g.addColorStop(p,c));return g;}
+  function drawHouse(){
+    ctx.clearRect(0,0,S,S);t+=0.012;
+    const cx=S/2,cy=S/2+20,hovY=Math.sin(t)*6;
+    ctx.save();ctx.globalAlpha=0.18+0.06*Math.sin(t*0.7);
+    ctx.beginPath();ctx.ellipse(cx,cy+130,180,22,0,0,Math.PI*2);
+    ctx.fillStyle=rgd(cx,cy+130,0,180,[[0,'rgba(63,185,80,0.5)'],[1,'rgba(63,185,80,0)']]);
+    ctx.fill();ctx.restore();
+    ctx.save();ctx.translate(0,hovY);
+    ctx.beginPath();ctx.ellipse(cx,cy+138,160,18,0,0,Math.PI*2);
+    ctx.fillStyle=rgd(cx,cy+138,0,160,[[0,'rgba(63,185,80,0.2)'],[1,'rgba(63,185,80,0)']]);ctx.fill();
+    const solPulse=0.5+0.5*Math.sin(t*1.2);
+    ctx.save();ctx.translate(cx-130,cy-60);ctx.rotate(-0.2);
+    ctx.fillStyle=grd(0,-20,40,10,[[0,'#0a2a4a'],[0.5,'#1a4a7a'],[1,'#0a2a4a']]);
+    ctx.beginPath();ctx.roundRect(0,0,60,40,4);ctx.fill();
+    ctx.strokeStyle=`rgba(0,180,210,${0.3+solPulse*0.4})`;ctx.lineWidth=1;ctx.stroke();
+    ctx.strokeStyle='rgba(0,150,200,0.3)';ctx.lineWidth=0.5;
+    for(let i=1;i<3;i++){ctx.beginPath();ctx.moveTo(i*20,0);ctx.lineTo(i*20,40);ctx.stroke();}
+    ctx.beginPath();ctx.moveTo(0,20);ctx.lineTo(60,20);ctx.stroke();
+    ctx.beginPath();ctx.arc(10+solPulse*5,8,3,0,Math.PI*2);
+    ctx.fillStyle=`rgba(255,220,100,${0.4+solPulse*0.4})`;ctx.fill();ctx.restore();
+    const hx=cx-80,hy=cy-20,hw=160,hh=130;
+    ctx.fillStyle=grd(hx,hy,hx,hy+hh,[[0,'#1a2a1f'],[0.5,'#0f1a14'],[1,'#0a1210']]);
+    ctx.beginPath();ctx.roundRect(hx,hy,hw,hh,6);ctx.fill();
+    ctx.strokeStyle='rgba(63,185,80,0.25)';ctx.lineWidth=1;ctx.stroke();
+    ctx.save();ctx.beginPath();ctx.roundRect(hx,hy,hw,hh,6);ctx.clip();
+    ctx.strokeStyle='rgba(63,185,80,0.04)';ctx.lineWidth=1;
+    for(let y=hy;y<hy+hh;y+=14){ctx.beginPath();ctx.moveTo(hx,y);ctx.lineTo(hx+hw,y);ctx.stroke();}
+    ctx.restore();
+    const roofPulse=0.5+0.3*Math.sin(t*0.8+0.5);
+    ctx.beginPath();ctx.moveTo(hx-12,hy);ctx.lineTo(cx,cy-110);ctx.lineTo(hx+hw+12,hy);ctx.closePath();
+    ctx.fillStyle=grd(cx,cy-110,cx,hy,[[0,'#2a1a0a'],[0.4,'#1a1208'],[1,'#0d0d0a']]);ctx.fill();
+    ctx.strokeStyle=`rgba(201,168,76,${0.2+roofPulse*0.2})`;ctx.lineWidth=1.5;ctx.stroke();
+    ctx.fillStyle='#0a1410';ctx.beginPath();ctx.roundRect(cx-16,hy+70,32,58,4);ctx.fill();
+    ctx.strokeStyle='rgba(201,168,76,0.35)';ctx.lineWidth=1;ctx.stroke();
+    ctx.beginPath();ctx.arc(cx+10,hy+100,3,0,Math.PI*2);ctx.fillStyle=AMBER;ctx.fill();
+    function drawWindow(wx,wy,ww,wh,glowColor,lit){
+      ctx.fillStyle='#050e08';ctx.beginPath();ctx.roundRect(wx,wy,ww,wh,3);ctx.fill();
+      if(lit){const lgrd=rgd(wx+ww/2,wy+wh/2,0,ww,[[0,glowColor+'aa'],[1,glowColor+'00']]);ctx.fillStyle=lgrd;ctx.fill();ctx.shadowColor=glowColor;ctx.shadowBlur=12;}
+      ctx.strokeStyle=lit?glowColor+'66':'rgba(168,184,176,0.15)';ctx.lineWidth=1;ctx.stroke();ctx.shadowBlur=0;
+      ctx.strokeStyle='rgba(168,184,176,0.1)';ctx.lineWidth=0.5;
+      ctx.beginPath();ctx.moveTo(wx+ww/2,wy);ctx.lineTo(wx+ww/2,wy+wh);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(wx,wy+wh/2);ctx.lineTo(wx+ww,wy+wh/2);ctx.stroke();
+    }
+    const winLit=Math.sin(t*0.4)>-0.2;
+    drawWindow(hx+12,hy+20,40,35,GREEN,winLit);drawWindow(hx+hw-52,hy+20,40,35,AMBER,true);
+    const pirActive=Math.sin(t*0.9+2)>0.7;
+    ctx.fillStyle='#0e1a12';ctx.beginPath();ctx.roundRect(hx+hw,hy+50,18,18,3);ctx.fill();
+    ctx.strokeStyle=pirActive?'rgba(255,80,80,0.8)':'rgba(63,185,80,0.3)';ctx.lineWidth=1;ctx.stroke();
+    ctx.beginPath();ctx.arc(hx+hw+9,hy+59,6,0,Math.PI*2);ctx.fillStyle=pirActive?'rgba(255,80,80,0.6)':'rgba(63,185,80,0.25)';ctx.fill();
+    if(pirActive){ctx.beginPath();ctx.arc(hx+hw+9,hy+59,14,0,Math.PI*2);ctx.strokeStyle='rgba(255,80,80,0.3)';ctx.lineWidth=1;ctx.stroke();}
+    ctx.font='7px Courier Prime';ctx.fillStyle='rgba(168,184,176,0.4)';ctx.textAlign='center';ctx.fillText('PIR',hx+hw+9,hy+76);
+    const soilMoist=Math.sin(t*0.5)>0.2;
+    ctx.fillStyle='#1a2a1f';ctx.beginPath();ctx.roundRect(hx-50,hy+80,28,40,4);ctx.fill();ctx.strokeStyle='rgba(63,185,80,0.2)';ctx.lineWidth=1;ctx.stroke();
+    const soilFill=soilMoist?0.7:0.25;
+    ctx.fillStyle=soilMoist?'rgba(63,185,80,0.4)':'rgba(201,168,76,0.5)';
+    ctx.beginPath();ctx.roundRect(hx-48,hy+80+40*(1-soilFill),24,40*soilFill,3);ctx.fill();
+    ctx.strokeStyle=GREEN;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(hx-36,hy+80);ctx.lineTo(hx-36,hy+55);ctx.stroke();
+    ctx.save();ctx.translate(hx-36,hy+68);ctx.rotate(-0.4+0.1*Math.sin(t));
+    ctx.fillStyle=grd(0,0,20,0,[[0,GREEN],[1,'transparent']]);ctx.beginPath();ctx.ellipse(12,0,16,6,0,0,Math.PI*2);ctx.fill();ctx.restore();
+    ctx.save();ctx.translate(hx-36,hy+62);ctx.rotate(0.5-0.1*Math.sin(t));
+    ctx.fillStyle=grd(0,0,-20,0,[[0,GREENL],[1,'transparent']]);ctx.beginPath();ctx.ellipse(-12,0,14,5,0,0,Math.PI*2);ctx.fill();ctx.restore();
+    if(!soilMoist){const dropY=((t*30)%60)+hy+40;ctx.beginPath();ctx.arc(hx-28,dropY,2.5,0,Math.PI*2);ctx.fillStyle='rgba(100,180,255,0.7)';ctx.fill();}
+    const lcdX=cx-30,lcdY=hy+28,lcdW=60,lcdH=32;
+    ctx.fillStyle='#020e06';ctx.beginPath();ctx.roundRect(lcdX,lcdY,lcdW,lcdH,3);ctx.fill();ctx.strokeStyle='rgba(63,185,80,0.5)';ctx.lineWidth=1;ctx.stroke();
+    ctx.font='bold 6.5px "Courier Prime",monospace';ctx.fillStyle=GREENL;ctx.textAlign='left';
+    ctx.fillText(`T:${(26+2*Math.sin(t*0.3)).toFixed(0)}C H:${(50+5*Math.sin(t*0.2)).toFixed(0)}%`,lcdX+4,lcdY+12);
+    ctx.fillStyle='rgba(126,231,135,0.6)';ctx.fillText(`L:${(700+200*Math.abs(Math.sin(t*0.1))).toFixed(0)} UV:${(1+Math.abs(Math.sin(t*0.08))*2).toFixed(0)}`,lcdX+4,lcdY+24);
+    if(Math.floor(t*2)%2===0){ctx.fillStyle=GREEN;ctx.fillRect(lcdX+lcdW-8,lcdY+20,5,2);}
+    const hue=(t*40)%360;const rgbX=cx+60,rgbY=hy-8;
+    ctx.beginPath();ctx.arc(rgbX,rgbY,7,0,Math.PI*2);ctx.fillStyle=`hsla(${hue},80%,60%,0.9)`;ctx.fill();
+    ctx.beginPath();ctx.arc(rgbX,rgbY,14,0,Math.PI*2);ctx.fillStyle=`hsla(${hue},80%,60%,0.15)`;ctx.fill();
+    const uvX=cx+40,uvY=cy-90;
+    ctx.beginPath();ctx.arc(uvX,uvY,10,0,Math.PI*2);ctx.fillStyle=grd(uvX-8,uvY-8,uvX+8,uvY+8,[[0,'#ffe060'],[1,'#ff8800']]);ctx.fill();
+    ctx.strokeStyle='rgba(255,200,50,0.5)';ctx.lineWidth=1;ctx.stroke();
+    for(let r=0;r<6;r++){const ang=(r/6)*Math.PI*2+t*0.5;ctx.beginPath();ctx.moveTo(uvX+Math.cos(ang)*12,uvY+Math.sin(ang)*12);ctx.lineTo(uvX+Math.cos(ang)*18,uvY+Math.sin(ang)*18);ctx.strokeStyle=`rgba(255,200,50,${0.3+0.3*Math.sin(t*1.5+r)})`;ctx.lineWidth=1.5;ctx.stroke();}
+    ctx.font='7px Courier Prime';ctx.fillStyle='rgba(255,200,50,0.5)';ctx.textAlign='center';ctx.fillText('UV',uvX,uvY+24);
+    const fanX=hx+hw-18,fanY=hy+65;const fanSpeed=Math.sin(t*0.3)>0?t*4:0;
+    ctx.save();ctx.translate(fanX,fanY);
+    for(let b=0;b<3;b++){ctx.save();ctx.rotate(fanSpeed+b*(Math.PI*2/3));ctx.beginPath();ctx.ellipse(0,-12,5,12,0,0,Math.PI*2);ctx.fillStyle='rgba(168,184,176,0.3)';ctx.fill();ctx.restore();}
+    ctx.beginPath();ctx.arc(0,0,4,0,Math.PI*2);ctx.fillStyle='#2a2a35';ctx.fill();ctx.strokeStyle='rgba(168,184,176,0.4)';ctx.lineWidth=1;ctx.stroke();ctx.restore();
+    ctx.font='7px Courier Prime';ctx.fillStyle='rgba(168,184,176,0.4)';ctx.textAlign='center';ctx.fillText('FAN',fanX,fanY+20);
+    const buzzX=hx+hw+8,buzzY=hy+30;const buzzA=pirActive?0.5+0.5*Math.sin(t*20):0.2;
+    ctx.beginPath();ctx.arc(buzzX,buzzY,8,0,Math.PI*2);ctx.fillStyle=`rgba(255,120,50,${buzzA*0.5})`;ctx.fill();ctx.strokeStyle=`rgba(255,120,50,${buzzA})`;ctx.lineWidth=1;ctx.stroke();
+    if(pirActive){for(let r=1;r<3;r++){ctx.beginPath();ctx.arc(buzzX,buzzY,8+r*8,0,Math.PI*2);ctx.strokeStyle=`rgba(255,80,80,${0.3/r*Math.abs(Math.sin(t*12))})`;ctx.lineWidth=1;ctx.stroke();}}
+    ctx.font='7px Courier Prime';ctx.fillStyle='rgba(255,120,50,0.4)';ctx.textAlign='center';ctx.fillText('BUZZ',buzzX,buzzY+18);
+    ctx.strokeStyle='rgba(168,184,176,0.3)';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(cx-10,cy-115);ctx.lineTo(cx-10,cy-142);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(cx-18,cy-142);ctx.lineTo(cx-2,cy-142);ctx.stroke();
+    const sigPulse=0.5+0.5*Math.sin(t*3);
+    for(let r=1;r<3;r++){ctx.beginPath();ctx.arc(cx-10,cy-142,r*7,Math.PI+0.3,Math.PI*2-0.3);ctx.strokeStyle=`rgba(63,185,80,${sigPulse*0.4/r})`;ctx.lineWidth=1;ctx.stroke();}
+    const wlX=hx+hw+32,wlY=hy+50;
+    ctx.fillStyle='#0a1410';ctx.beginPath();ctx.roundRect(wlX,wlY,14,50,3);ctx.fill();ctx.strokeStyle='rgba(100,180,255,0.3)';ctx.lineWidth=1;ctx.stroke();
+    const wl=0.3+0.5*Math.abs(Math.sin(t*0.3));
+    ctx.fillStyle=grd(wlX,wlY,wlX,wlY+50,[[0,'rgba(100,180,255,0.7)'],[1,'rgba(50,120,200,0.4)']]);
+    ctx.beginPath();ctx.roundRect(wlX+1,wlY+50*(1-wl),12,50*wl,2);ctx.fill();
+    ctx.font='7px Courier Prime';ctx.fillStyle='rgba(100,180,255,0.5)';ctx.textAlign='center';ctx.fillText('H₂O',wlX+7,wlY+62);
+    ctx.restore();
+    const connPairs=[{from:[cx-36,cy-60+hovY],to:[S/2+100,S/2-50],col:GREEN},{from:[cx+80,cy-20+hovY],to:[S/2+120,S/2+10],col:AMBER},{from:[cx-80,cy+60+hovY],to:[S/2-120,S/2+60],col:TEAL}];
+    connPairs.forEach((cp,i)=>{
+      const prog=((t*0.6+i*0.4)%1);const dotX=cp.from[0]+(cp.to[0]-cp.from[0])*prog;const dotY=cp.from[1]+(cp.to[1]-cp.from[1])*prog;
+      ctx.setLineDash([4,12]);ctx.lineDashOffset=-t*8;ctx.beginPath();ctx.moveTo(cp.from[0],cp.from[1]);ctx.lineTo(cp.to[0],cp.to[1]);ctx.strokeStyle=cp.col+'30';ctx.lineWidth=1;ctx.stroke();ctx.setLineDash([]);
+      ctx.beginPath();ctx.arc(dotX,dotY,3,0,Math.PI*2);ctx.fillStyle=cp.col;ctx.globalAlpha=0.7;ctx.fill();ctx.globalAlpha=1;
+    });
+  }
+  function loop(){drawHouse();requestAnimationFrame(loop);}loop();
+})();
+
+(function(){
+  const cv=document.getElementById('pcb-canvas');if(!cv)return;
+  const ctx=cv.getContext('2d');const W=440,H=340;cv.width=W;cv.height=H;let t=0;
+  const GREEN='#3fb950',AMBER='#c9a84c',TEAL='#00b4aa',SIL='#a8b8b0';
+  function drawPCB(){
+    ctx.clearRect(0,0,W,H);t++;const bx=80,by=40,bw=280,bh=260;
+    ctx.fillStyle='#071409';ctx.strokeStyle='rgba(63,185,80,0.25)';ctx.lineWidth=1.5;
+    ctx.beginPath();ctx.roundRect(bx,by,bw,bh,8);ctx.fill();ctx.stroke();
+    ctx.save();ctx.beginPath();ctx.roundRect(bx,by,bw,bh,8);ctx.clip();
+    ctx.strokeStyle='rgba(20,60,30,0.5)';ctx.lineWidth=0.5;
+    for(let x=bx;x<bx+bw;x+=20){ctx.beginPath();ctx.moveTo(x,by);ctx.lineTo(x,by+bh);ctx.stroke();}
+    for(let y=by;y<by+bh;y+=20){ctx.beginPath();ctx.moveTo(bx,y);ctx.lineTo(bx+bw,y);ctx.stroke();}
+    ctx.restore();
+    ctx.font='bold 14px "Courier Prime",monospace';ctx.fillStyle=TEAL;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('KEYESTUDIO',bx+bw/2,by+22);
+    ctx.font='bold 24px "Courier Prime",monospace';ctx.fillStyle='rgba(255,255,255,0.88)';ctx.fillText('UNO PLUS',bx+bw/2,by+48);
+    ctx.font='8px "Courier Prime",monospace';ctx.fillStyle='rgba(63,185,80,0.5)';ctx.fillText('KS0486 · ATmega328P · 16MHz',bx+bw/2,by+66);
+    const mx=bx+92,my=by+96,mw=96,mh=76;
+    ctx.fillStyle='#12180e';ctx.strokeStyle=GREEN;ctx.lineWidth=0.8;ctx.beginPath();ctx.roundRect(mx,my,mw,mh,4);ctx.fill();ctx.stroke();
+    ctx.font='7.5px "Courier Prime",monospace';ctx.fillStyle=SIL;ctx.textAlign='center';ctx.fillText('ATmega',mx+mw/2,my+mh/2-6);ctx.fillText('328P-AU',mx+mw/2,my+mh/2+6);
+    const pp=0.5+0.5*Math.sin(t*.05);
+    for(let i=0;i<6;i++){const py=my+10+i*11;ctx.fillStyle=`rgba(63,185,80,${0.25+pp*.4})`;ctx.fillRect(mx-11,py,9,4);ctx.fillRect(mx+mw+2,py,9,4);}
+    ctx.fillStyle='#2a2a32';ctx.strokeStyle='rgba(63,185,80,0.45)';ctx.lineWidth=1;ctx.beginPath();ctx.roundRect(bx-2,by+96,16,28,3);ctx.fill();ctx.stroke();
+    ctx.font='6.5px "Courier Prime",monospace';ctx.fillStyle=GREEN;ctx.textAlign='center';ctx.fillText('USB',bx+7,by+140);
+    ctx.beginPath();ctx.arc(bx+28,by+bh-22,11,0,Math.PI*2);ctx.fillStyle='#1a1a1a';ctx.fill();ctx.strokeStyle=SIL;ctx.lineWidth=1;ctx.stroke();
+    ctx.beginPath();ctx.arc(bx+28,by+bh-22,4,0,Math.PI*2);ctx.fillStyle='#0a0a0a';ctx.fill();
+    ctx.font='6.5px "Courier Prime",monospace';
+    const activeDig=[5,7,9,10,11];
+    for(let i=0;i<14;i++){const px=bx+bw-15,py2=by+18+i*16.5;const isA=activeDig.includes(i);const pulse=isA?(0.5+0.5*Math.sin(t*.07+i)):0;ctx.fillStyle=isA?`rgba(63,185,80,${0.55+pulse*.4})`:'rgba(168,184,176,0.25)';ctx.fillRect(px,py2,13,7);ctx.fillStyle=isA?GREEN:'rgba(168,184,176,0.35)';ctx.textAlign='right';ctx.fillText('D'+i,px-2,py2+5.5);}
+    const activeAna=[0,1,2,3,4,5,6];
+    for(let i=0;i<8;i++){const px=bx+10,py2=by+bh-24-i*17;if(py2<by+20)continue;const isA=activeAna.includes(i);const pulse=isA?(0.5+0.5*Math.sin(t*.065+i)):0;ctx.fillStyle=isA?`rgba(201,168,76,${0.55+pulse*.4})`:'rgba(168,184,176,0.25)';ctx.fillRect(px,py2,13,7);ctx.fillStyle=isA?AMBER:'rgba(168,184,176,0.35)';ctx.textAlign='left';ctx.fillText('A'+i,px+16,py2+5.5);}
+    [{x:bx+bw-28,y:by+bh-18,c:TEAL,l:'TX'},{x:bx+bw-46,y:by+bh-18,c:GREEN,l:'RX'},{x:bx+bw-64,y:by+bh-18,c:'#ff5050',l:'PWR'}].forEach(led=>{
+      const lp=0.5+0.5*Math.sin(t*.055);ctx.beginPath();ctx.arc(led.x,led.y,4.5,0,Math.PI*2);ctx.fillStyle=led.c;ctx.globalAlpha=0.45+lp*.55;ctx.fill();ctx.globalAlpha=1;ctx.font='6px "Courier Prime",monospace';ctx.fillStyle=led.c;ctx.textAlign='center';ctx.fillText(led.l,led.x,led.y+13);
+    });
+    const traces=[{x:mx+mw,y:my+18,tx:bx+bw-15,ty:by+5*16.5+21,col:GREEN},{x:mx+mw,y:my+29,tx:bx+bw-15,ty:by+7*16.5+21,col:AMBER},{x:mx+mw,y:my+40,tx:bx+bw-15,ty:by+9*16.5+21,col:GREEN},{x:mx,y:my+48,tx:bx+10+13,ty:by+bh-24-4*17+3,col:TEAL},{x:mx,y:my+59,tx:bx+10+13,ty:by+bh-24-5*17+3,col:AMBER}];
+    traces.forEach((tr,i)=>{const pr=((t*1.2+i*35)%180)/180;ctx.setLineDash([24,180-24]);ctx.lineDashOffset=-pr*180;ctx.beginPath();ctx.moveTo(tr.x,tr.y);ctx.lineTo(tr.x+18,tr.y);ctx.lineTo(tr.x+18,tr.ty);ctx.lineTo(tr.tx,tr.ty);ctx.strokeStyle=tr.col;ctx.lineWidth=0.9;ctx.globalAlpha=0.45;ctx.stroke();ctx.globalAlpha=1;ctx.setLineDash([]);});
+  }
+  function loop(){drawPCB();requestAnimationFrame(loop);}loop();
+})();
+
+const statsObs=new IntersectionObserver(entries=>{
+  entries.forEach(entry=>{
+    if(entry.isIntersecting){entry.target.querySelectorAll('.stat-num').forEach(el=>{el.style.animation='counterUp 0.6s ease forwards';});}
+  });
+},{threshold:0.5});
+document.querySelectorAll('.stats-band').forEach(el=>statsObs.observe(el));
+</script>
 </body>
 </html>
+HTMLEOF
+echo "Done — $(wc -c < /home/claude/eco_house.html) bytes"
+Output
+
+Done — 72240 bytes
+Done
