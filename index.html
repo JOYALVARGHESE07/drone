@@ -1,123 +1,114 @@
-HTML Tags Explained
-The page skeleton
-<html> - The root of the page. Everything else sits inside it, like the box that holds the whole document.
-<head> - The behind-the-scenes part. It holds the title, styles and settings, and none of it shows on screen.
-<title> - Sets the name on the browser tab. Search results use it too, so make it clear.
-<meta> - Extra info about the page, like its encoding or description. Visitors never see it, but browsers and search engines do.
-<link> - Connects your page to outside files, most often a stylesheet. It also sets the little tab icon.
-<style> - Lets you write CSS right inside the page. Great for small pages.
-<base> - Sets the starting address for every relative link. You get only one, and most people never need it.
-<body> - Everything the visitor actually sees: text, images, buttons. A page has just one.
-Page layout
-<header> - The intro area of a page or section, often with a logo, title or menu.
-<nav> - Marks a group of links for getting around, like a menu. Screen readers can jump straight to it.
-<main> - The core content of the page, without the repeated header and footer. Use it once.
-<section> - A themed chunk of content that deserves its own heading. No natural heading? A div may fit better.
-<article> - Content that makes sense on its own, like a blog post or comment. You could copy it elsewhere and it would still read fine.
-<aside> - Side content that's related but not essential, like a sidebar or callout. Remove it and the main text still works.
-<footer> - The closing part of a page or section, usually copyright, contact info or links.
-<address> - Contact details for the author or organization. It's for contacts, not any random street address.
-<h1 – h6> - Six heading levels, from biggest (h1) to smallest (h6). Use them like an outline, not just to make text large.
-<hgroup> - Bundles a heading with its subtitle or tagline so they read as one unit.
-<search> - Wraps the search or filter area, like a search bar and its button. It tells assistive tech "this is search".
-Blocks of text
-<p> - A paragraph. It's the everyday container for body text.
-<div> - A plain, invisible box for grouping things. It does nothing until you style it with CSS.
-<span> - The inline version of div. Use it to style a few words in the middle of a sentence.
-<blockquote> - A longer quotation, usually shown indented. You can point to the source with the cite attribute.
-<pre> - Text shown exactly as typed, spaces and line breaks included, in a monospace font. Perfect for code or ASCII art.
-<hr> - A horizontal line that marks a break in topic or scene. Think of it as a "new chapter" divider.
-<ul> - An unordered list, shown with bullets. Use it when the order doesn't matter.
-<ol> - An ordered list, shown with numbers. Use it for steps or rankings.
-<li> - One item inside a list. It must live inside a ul, ol or menu.
-<menu> - A list of actions or items that browsers treat just like ul. It's a more meaningful name for toolbars.
-<dl> - A description list, like a glossary of terms and meanings. Also handy for label and value pairs.
-<dt> - The term in a description list, the thing being explained.
-<dd> - The explanation that goes with a dt term.
-<figure> - Self-contained content like an image, chart or code sample, with an optional caption. It's referenced as one unit.
-<figcaption> - The caption for a figure. It tells the reader what they're looking at.
-Words inside a sentence
-<a> - The link tag. With an href it takes people to another page, file, email or spot on the same page.
-<abbr> - Marks an abbreviation or acronym. Add a title and hovering shows the full meaning.
-<b> - Draws attention to text without adding extra importance, like a product name. For real importance use strong.
-<bdi> - Isolates text so its direction doesn't get mixed up with the text around it. Useful for user names in any language.
-<bdo> - Forces text to run left-to-right or right-to-left, whatever the surroundings say.
-<br> - A line break. Good for poems and addresses, but not for spacing paragraphs.
-<cite> - The title of a creative work, like a book, film or song. It's the name, not the quote itself.
-<code> - A short piece of computer code inside a sentence, shown in monospace.
-<data> - Pairs visible text with a machine-readable value. For dates and times, use time instead.
-<dfn> - Marks the word being defined in a sentence. The first time you introduce a term is a good moment for it.
-<em> - Stressed emphasis, the way you'd lean on a word when speaking. Browsers usually show it in italics.
-<i> - Text set apart from normal, like a foreign phrase, a thought or a technical term. It's usually italic.
-<kbd> - Something the user types or presses, like Ctrl + C. Browsers show it in monospace.
-<mark> - Highlights text because it's relevant right now, like a search match.
-<q> - A short inline quote. Browsers add the quotation marks for you.
-<ruby> - Shows small notes above or beside text, mostly pronunciation for East Asian characters.
-<rt> - The little annotation text inside a ruby, like the pronunciation guide.
-<rp> - Fallback parentheses around rt for browsers that can't show ruby. Most people never see them.
-<s> - Strikethrough for things that are no longer true or relevant, like an old price. For edits, use del and ins.
-<samp> - Sample output from a program, like an error message, shown in monospace.
-<small> - Fine print such as legal text or copyright. It's usually a bit smaller.
-<strong> - Text that really matters or is urgent, like a warning. Browsers usually show it bold.
-<sub> - Subscript, lowered small text, like the 2 in H₂O.
-<sup> - Superscript, raised small text, like the 2 in x² or a footnote number.
-<time> - A date or time that machines can read too, through the datetime attribute. It helps search engines and reminders.
-<u> - Underlined text with a non-text meaning, like marking a spelling mistake. Don't use it for links, since people expect those to be underlined.
-<var> - A variable name in math or code, usually shown in italics.
-<wbr> - A spot where the browser may break a long word if it needs to. It's handy for long URLs.
-Images, audio and video
-<img> - Puts an image on the page. Always add alt text so people who can't see it still get the idea.
-<picture> - Offers different versions of an image for different screens or formats. The browser picks the best one.
-<source> - One option of a file inside picture, audio or video. List several formats so every browser finds one it likes.
-<audio> - A built-in audio player. Add controls so people can press play.
-<video> - A built-in video player. It works like audio but with a picture.
-<track> - Adds subtitles or captions to a video or audio. It makes your media friendlier and more accessible.
-<map> - Defines a clickable image map. It works together with area.
-<area> - One clickable zone inside a map, like a single country on a world picture.
-Embedding other things
-<iframe> - A window showing another web page inside yours. YouTube embeds use this.
-<embed> - Drops in external content, such as a plugin or media, at that spot. Newer tags usually do the job better.
-<object> - Embeds an external resource that can act like an image, a nested page or a plugin.
-<svg> - Holds scalable vector graphics, drawings that stay sharp at any size. You can write them right inside HTML.
-<math> - Holds a math formula written in MathML. It lets equations display properly in the page.
-<canvas> - A blank drawing board you paint on with JavaScript. It's used for games, charts and animations.
-Scripts and templates
-<script> - Adds JavaScript, or other data, to the page. It brings the page to life.
-<noscript> - Content shown only when JavaScript is off or unavailable. It's a polite fallback message.
-<template> - Holds HTML that stays hidden until JavaScript copies it onto the page. Great for repeating things like list rows.
-<slot> - A placeholder inside a web component that you fill with your own content.
-Showing edits
-<del> - Text that was deleted. Like track changes, it's often shown crossed out.
-<ins> - Text that was added. It's often shown underlined, and pairs with del.
-Tables
-<table> - A grid of data in rows and columns. Use it for real data, not page layout.
-<caption> - The title of a table. It tells readers what the table is about.
-<thead> - The header section of a table, where column titles live.
-<tbody> - The main body of a table, with the actual data rows.
-<tfoot> - The footer section of a table, often totals or a summary.
-<tr> - One row in a table. It holds the cells.
-<th> - A header cell that labels a row or column. Browsers usually make it bold and centered.
-<td> - A regular data cell. This is where each value goes.
-<colgroup> - Groups columns together so you can style them at once.
-<col> - Describes one column inside a colgroup, handy for setting width or color.
-Forms and inputs
-<form> - The container for controls people fill in and submit, like a login or signup.
-<label> - The text that names a control. Clicking it focuses the control, which helps everyone.
-<input> - The shape-shifter. Depending on its type it becomes a text box, checkbox, date picker, slider, file chooser and more.
-<button> - Something to click that does an action, like submitting a form or opening a menu.
-<select> - A dropdown menu of choices.
-<option> - One choice inside a select or datalist.
-<optgroup> - Groups related options under a heading inside a select.
-<selectedcontent> - Mirrors the chosen option's content inside a closed select, so the dropdown can display it nicely.
-<datalist> - Suggests values for an input while still letting people type their own, like autocomplete.
-<textarea> - A big multi-line text box for comments, messages or feedback.
-<fieldset> - Groups related form controls in a box, like all the address fields together.
-<legend> - The title of a fieldset. It describes what the group is for.
-<output> - Shows the result of a calculation or an action, like a total that updates live.
-<progress> - A progress bar showing how far along a task is.
-<meter> - A gauge for a value in a known range, like disk space used or a score.
-Interactive pieces
-<details> - A show-and-hide box. The content stays tucked away until someone opens it, no JavaScript needed.
-<summary> - The clickable label of a details box. Tapping it opens and closes the content.
-<dialog> - A pop-up box or modal, like an alert or a small window above the page.
-<geolocation> - A built-in control that lets the visitor choose to share their location with the page.
+<h1>About Myself</h1>
+
+<p><b>Name:</b> Joyal Varghese</p>
+<p><b>Group:</b> 4230</p>
+
+<hr>
+
+<h2>About Me</h2>
+
+<p>
+    Hello! My name is Joyal Varghese. I am a student from
+    Group 4230. I am interested in computers, technology,
+    and web development.
+</p>
+
+<p>
+    I enjoy learning new things and improving my knowledge.
+    I like exploring technology and understanding how websites
+    and computer programs work.
+</p>
+
+<h2>My Education</h2>
+
+<p>
+    I am currently studying and developing my knowledge in
+    computer science and technology. I am learning how to
+    create webpages using HTML and other web technologies.
+</p>
+
+<h2>My Hobbies</h2>
+
+<ul>
+    <li>Listening to music</li>
+    <li>Watching movies</li>
+    <li>Playing games</li>
+    <li>Travelling</li>
+    <li>Using computers</li>
+    <li>Learning new technology</li>
+</ul>
+
+<h2>My Skills</h2>
+
+<ul>
+    <li>HTML</li>
+    <li>Basic CSS</li>
+    <li>Basic JavaScript</li>
+    <li>Computer skills</li>
+    <li>Problem solving</li>
+</ul>
+
+<h2>My Strengths</h2>
+
+<ul>
+    <li>I am hardworking.</li>
+    <li>I like learning new things.</li>
+    <li>I try to complete my work on time.</li>
+    <li>I enjoy solving problems.</li>
+    <li>I am interested in technology.</li>
+</ul>
+
+<h2>My Interests</h2>
+
+<p>
+    I am interested in computers, programming, websites,
+    technology, and learning new skills. I enjoy finding
+    out how websites are created and how they work.
+</p>
+
+<h2>My Goals</h2>
+
+<p>
+    My short-term goal is to improve my programming and
+    web development skills. I want to learn more about
+    HTML, CSS, JavaScript, and other technologies.
+</p>
+
+<p>
+    My long-term goal is to become a successful IT professional
+    and build useful websites and applications.
+</p>
+
+<h2>My Presentation</h2>
+
+<p>
+    You can view my HTML presentation by clicking the link below:
+</p>
+
+<p>
+    <a href="https://docs.google.com/presentation/d/1XBm_f-HZ9cLRC9m6mXAiTQudHmayMlkeXEZgbuWK1ks/edit?usp=sharing"
+       target="_blank">
+        Open My HTML Presentation
+    </a>
+</p>
+
+<h2>My Motto</h2>
+
+<p>
+    <b>"Learn something new every day and never stop improving."</b>
+</p>
+
+<hr>
+
+<h2>Thank You</h2>
+
+<p>
+    Thank you for visiting my profile and learning a little
+    about me.
+</p>
+
+<hr>
+
+<p>
+    <b>Joyal Varghese | Group 4230</b>
+</p>
